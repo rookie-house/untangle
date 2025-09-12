@@ -11,9 +11,14 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@libsql/client": "^0.15.15",
+		"dotenv": "^17.2.2",
+		"drizzle-orm": "^0.44.5",
 		"hono": "^4.9.7"
 	},
 	"devDependencies": {
-		"@types/node": "^24.3.2"
+		"@types/node": "^24.3.2",
+		"drizzle-kit": "^0.31.4",
+		"tsx": "^4.20.5"
 	}
 }

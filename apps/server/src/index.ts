@@ -1,10 +1,10 @@
-import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
+import { hono } from "./lib/hono";
 import routes from "./routes";
 
-const app = new Hono();
+const app = hono();
 
 app.use(logger());
 app.use("*", async (c, next) => {
@@ -21,6 +21,6 @@ app.get("/", (c) => c.text("Hello Hono!"));
 
 app.route("/api", routes);
 
-app.get("/health", (c) => c.json({ status: "ok" }));
+app.get("/health", (ctx) => ctx.json({ status: "ok" }));
 
 export default app;
