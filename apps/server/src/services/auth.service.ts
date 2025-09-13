@@ -145,12 +145,12 @@ export class AuthService {
 			.insert(users)
 			.values({
 				email: me.email,
-				googleAccess: tokens.refresh_token,
+				googleAccess: tokens.access_token,
 			})
 			.onConflictDoUpdate({
 				target: users.email,
 				set: {
-					googleAccess: tokens.refresh_token,
+					googleAccess: tokens.access_token,
 				},
 			})
 			.returning({
