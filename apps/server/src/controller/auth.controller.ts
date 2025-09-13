@@ -17,7 +17,7 @@ export class AuthController {
 				201,
 			);
 		} catch (error) {
-			return ctx.json(api_response({ message: 'User creation failed', is_error: true }), 400);
+			return ctx.json(api_response({ message: error instanceof Error ? error.message : 'signup failed', is_error: true }), 400);
 		}
 	};
 	public static readonly signin = async (ctx: Context) => {
@@ -33,7 +33,7 @@ export class AuthController {
 				200,
 			);
 		} catch (error) {
-			return ctx.json(api_response({ message: 'User sign in failed', is_error: true }), 400);
+			return ctx.json(api_response({ message: error instanceof Error ? error.message : 'signin failed', is_error: true }), 400);
 		}
 	};
 	public static readonly google = async (ctx: Context) => {
@@ -43,7 +43,7 @@ export class AuthController {
 		} catch (error) {
 			return ctx.json(
 				api_response({
-					message: 'Google authentication failed',
+					message: error instanceof Error ? error.message : 'unable to redirect to google',
 					is_error: true,
 				}),
 				400,
@@ -69,7 +69,7 @@ export class AuthController {
 		} catch (error) {
 			return ctx.json(
 				api_response({
-					message: 'Google authentication failed',
+					message: error instanceof Error ? error.message : 'google callback failed',
 					is_error: true,
 				}),
 				400,
