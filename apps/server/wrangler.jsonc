@@ -1,7 +1,0 @@
-{
-	"name": "untangle-be",
-	"account_id": "8e881b9a74499449986a0620ec2c2a22",
-	"main": "src/index.ts",
-	"compatibility_date": "2025-09-13",
-	"compatibility_flags": ["nodejs_compat"]
-}
