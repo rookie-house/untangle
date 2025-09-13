@@ -1,26 +1,18 @@
-import type { Context } from "hono";
-import { sign, verify } from "hono/jwt";
-import { compare, hash } from "bcryptjs";
-import { eq } from "drizzle-orm";
-import { initializeDatabase, validateEnvironment } from "@/lib/utils/helper";
-import { users } from "@/lib/db/schema";
-import type { IJwtUserPayload } from "@/types/jwt";
-import GoogleAuth from "@/lib/google";
+import type { Context } from 'hono';
+import { sign, verify } from 'hono/jwt';
+import { compare, hash } from 'bcryptjs';
+import { eq } from 'drizzle-orm';
+import { initializeDatabase, validateEnvironment } from '@/lib/utils/helper';
+import { users } from '@/lib/db/schema';
+import type { IJwtUserPayload } from '@/types/jwt';
+import GoogleAuth from '@/lib/google';
 
 export class AuthService {
-	public static readonly signup = async ({
-		ctx,
-		email,
-		password,
-	}: {
-		ctx: Context;
-		email: string;
-		password: string;
-	}) => {
+	public static readonly signup = async ({ ctx, email, password }: { ctx: Context; email: string; password: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
-			throw new Error("Environment variables are not properly configured.");
+			throw new Error('Environment variables are not properly configured.');
 		}
 
 		const { db, error: dbError } = await initializeDatabase(ctx);
@@ -30,14 +22,10 @@ export class AuthService {
 		}
 
 		// Check if user already exists
-		const existingUser = await db
-			.select()
-			.from(users)
-			.where(eq(users.email, email))
-			.get();
+		const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
 
 		if (existingUser) {
-			throw new Error("User already exists.");
+			throw new Error('User already exists.');
 		}
 
 		const hashedPassword = await this._hashPass({
@@ -46,14 +34,10 @@ export class AuthService {
 		});
 
 		// Insert new user into the database
-		const newUser = await db
-			.insert(users)
-			.values({ email, password: hashedPassword })
-			.returning()
-			.get();
+		const newUser = await db.insert(users).values({ email, password: hashedPassword }).returning().get();
 
 		if (!newUser) {
-			throw new Error("Failed to create user.");
+			throw new Error('Failed to create user.');
 		}
 
 		const token = await this._signToken({
@@ -64,19 +48,11 @@ export class AuthService {
 		return { token, user: { id: newUser.id, email: newUser.email } };
 	};
 
-	public static readonly signin = async ({
-		ctx,
-		email,
-		password,
-	}: {
-		ctx: Context;
-		email: string;
-		password: string;
-	}) => {
+	public static readonly signin = async ({ ctx, email, password }: { ctx: Context; email: string; password: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
-			throw new Error("Environment variables are not properly configured.");
+			throw new Error('Environment variables are not properly configured.');
 		}
 
 		const { db, error: dbError } = await initializeDatabase(ctx);
@@ -86,18 +62,14 @@ export class AuthService {
 		}
 
 		// Find user by email
-		const user = await db
-			.select()
-			.from(users)
-			.where(eq(users.email, email))
-			.get();
+		const user = await db.select().from(users).where(eq(users.email, email)).get();
 
 		if (!user) {
-			throw new Error("User not found.");
+			throw new Error('User not found.');
 		}
 
 		if (!user.password) {
-			throw new Error("User has no password set.");
+			throw new Error('User has no password set.');
 		}
 
 		// Verify password
@@ -107,7 +79,7 @@ export class AuthService {
 		});
 
 		if (!isPasswordValid) {
-			throw new Error("Invalid password.");
+			throw new Error('Invalid password.');
 		}
 
 		const token = await this._signToken({
@@ -122,51 +94,45 @@ export class AuthService {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
-			throw new Error("Environment variables are not properly configured.");
+			throw new Error('Environment variables are not properly configured.');
 		}
 
 		const googleAuthUrl = GoogleAuth.getInstance({
-			googleClientId: ctx.env.GOOGLE_CLIENT_ID || "",
-			googleClientSecret: ctx.env.GOOGLE_CLIENT_SECRET || "",
-			googleRedirectUri: ctx.env.GOOGLE_REDIRECT_URI || "",
+			googleClientId: ctx.env.GOOGLE_CLIENT_ID || '',
+			googleClientSecret: ctx.env.GOOGLE_CLIENT_SECRET || '',
+			googleRedirectUri: ctx.env.GOOGLE_REDIRECT_URI || '',
 		}).getAuthUrl();
 
 		if (!googleAuthUrl) {
-			throw new Error("Failed to generate Google authentication URL.");
+			throw new Error('Failed to generate Google authentication URL.');
 		}
 
 		return { url: googleAuthUrl };
 	};
 
-	public static readonly googleCallback = async ({
-		ctx,
-		code,
-	}: {
-		ctx: Context;
-		code: string;
-	}) => {
+	public static readonly googleCallback = async ({ ctx, code }: { ctx: Context; code: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
-			throw new Error("Environment variables are not properly configured.");
+			throw new Error('Environment variables are not properly configured.');
 		}
 
 		const google = await GoogleAuth.getInstance({
-			googleClientId: ctx.env.GOOGLE_CLIENT_ID || "",
-			googleClientSecret: ctx.env.GOOGLE_CLIENT_SECRET || "",
-			googleRedirectUri: ctx.env.GOOGLE_REDIRECT_URI || "",
+			googleClientId: ctx.env.GOOGLE_CLIENT_ID || '',
+			googleClientSecret: ctx.env.GOOGLE_CLIENT_SECRET || '',
+			googleRedirectUri: ctx.env.GOOGLE_REDIRECT_URI || '',
 		});
 
 		const tokens = await google.getTokens(code);
 
 		if (!tokens || !tokens.access_token) {
-			throw new Error("Failed to retrieve Google tokens.");
+			throw new Error('Failed to retrieve Google tokens.');
 		}
 
 		const me = await google.me(tokens.access_token);
 
 		if (!me || !me.email) {
-			throw new Error("Failed to retrieve user info from Google.");
+			throw new Error('Failed to retrieve user info from Google.');
 		}
 
 		const { db, error: dbError } = await initializeDatabase(ctx);
@@ -195,7 +161,7 @@ export class AuthService {
 			.get();
 
 		if (!user) {
-			throw new Error("Failed to create or update user.");
+			throw new Error('Failed to create or update user.');
 		}
 
 		const token = await this._signToken({
@@ -206,33 +172,25 @@ export class AuthService {
 		return { token, user: { id: user.id, email: user.email } };
 	};
 
-	private static async _hashPass({
-		password,
-		salt,
-	}: {
-		password: string;
-		salt: string;
-	}): Promise<string> {
+	private static async _hashPass({ password, salt }: { password: string; salt: string }): Promise<string> {
 		return await hash(password, Number(salt));
 	}
 
-	private static async _verifyPass({
-		password,
-		hash,
-	}: {
-		password: string;
-		hash: string;
-	}): Promise<boolean> {
+	private static async _verifyPass({ password, hash }: { password: string; hash: string }): Promise<boolean> {
 		return await compare(password, hash);
 	}
 
-	private static async _signToken({
-		user,
-		secret,
-	}: {
-		user: IJwtUserPayload;
-		secret: string;
-	}): Promise<string> {
+	private static async _signToken({ user, secret }: { user: IJwtUserPayload; secret: string }): Promise<string> {
 		return await sign({ id: user.id }, secret);
+	}
+	public static async verifyToken({ token, ctx }: { token: string; ctx: Context }): Promise<IJwtUserPayload | null> {
+		try {
+			const secret = ctx.env.JWT_SECRET;
+			const payload = (await verify(token, secret)) as unknown as IJwtUserPayload;
+			return payload;
+		} catch (error) {
+			console.error('Token verification failed:', error);
+			return null;
+		}
 	}
 }
