@@ -5,16 +5,25 @@
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy --minify",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"drizzle:generate": "drizzle-kit generate",
+		"drizzle:migrate": "drizzle-kit migrate"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@hono/zod-validator": "^0.7.2",
 		"@libsql/client": "^0.15.15",
+		"bcryptjs": "^3.0.2",
 		"dotenv": "^17.2.2",
 		"drizzle-orm": "^0.44.5",
-		"hono": "^4.9.7"
+		"googleapis": "^159.0.0",
+		"hono": "^4.9.7",
+		"wrangler": "^4.36.0",
+		"zod": "^4.1.8"
 	},
 	"devDependencies": {
 		"@types/node": "^24.3.2",
