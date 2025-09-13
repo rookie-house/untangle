@@ -1,26 +1,19 @@
-import { google, Auth } from "googleapis";
-import crypto from "node:crypto";
+import { google, Auth } from 'googleapis';
+import crypto from 'node:crypto';
 
 class GoogleAuth {
 	private static instance: GoogleAuth;
 	private _googleClient: Auth.OAuth2Client;
-	private _scopes = [
-		"https://www.googleapis.com/auth/drive.metadata.readonly",
-		"https://www.googleapis.com/auth/calendar.readonly",
-	];
+	private _scopes = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'];
 
 	private constructor(
 		private config: {
 			googleClientId: string;
 			googleClientSecret: string;
 			googleRedirectUri: string;
-		}
+		},
 	) {
-		this._googleClient = new google.auth.OAuth2(
-			this.config.googleClientId,
-			this.config.googleClientSecret,
-			this.config.googleRedirectUri
-		);
+		this._googleClient = new google.auth.OAuth2(this.config.googleClientId, this.config.googleClientSecret, this.config.googleRedirectUri);
 	}
 
 	public static getInstance({
@@ -44,10 +37,10 @@ class GoogleAuth {
 
 	public getAuthUrl() {
 		const authUrl = this._googleClient.generateAuthUrl({
-			access_type: "offline",
+			access_type: 'offline',
 			scope: this._scopes,
 			include_granted_scopes: true,
-			state: crypto.randomBytes(32).toString("hex"),
+			state: crypto.randomBytes(32).toString('hex'),
 		});
 		return authUrl;
 	}

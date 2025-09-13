@@ -14,7 +14,7 @@ export interface Env {
 
 export interface Val {
 	user: {
-		id: string;
+		id: number;
 		email: string;
 	};
 	db: {

@@ -25,7 +25,7 @@ export class AuthService {
 		const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
 
 		if (existingUser) {
-			throw new Error('User already exists.');
+			throw new Error('A user with this email address already exists.');
 		}
 
 		const hashedPassword = await this._hashPass({
@@ -65,11 +65,11 @@ export class AuthService {
 		const user = await db.select().from(users).where(eq(users.email, email)).get();
 
 		if (!user) {
-			throw new Error('User not found.');
+			throw new Error('User with this email address not found');
 		}
 
 		if (!user.password) {
-			throw new Error('User has no password set.');
+			throw new Error('User has no password set. Please use Google Sign-In.');
 		}
 
 		// Verify password
@@ -79,7 +79,7 @@ export class AuthService {
 		});
 
 		if (!isPasswordValid) {
-			throw new Error('Invalid password.');
+			throw new Error('Invalid password');
 		}
 
 		const token = await this._signToken({
