@@ -6,6 +6,7 @@ import { api_response } from '@/types/api-response';
 export class AuthController {
 	public static readonly signup = async (ctx: Context) => {
 		try {
+			// @ts-ignore
 			const { email, password }: AuthValidator = ctx.req.valid('json');
 			const user = await AuthService.signup({ ctx, email, password });
 			return ctx.json(
@@ -22,6 +23,7 @@ export class AuthController {
 	};
 	public static readonly signin = async (ctx: Context) => {
 		try {
+			// @ts-ignore
 			const { email, password }: AuthValidator = ctx.req.valid('json');
 			const user = await AuthService.signin({ ctx, email, password });
 			return ctx.json(
