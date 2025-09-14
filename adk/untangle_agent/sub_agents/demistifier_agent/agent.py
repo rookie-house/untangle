@@ -48,10 +48,9 @@ risk_phrase_extractor_agent = LlmAgent(
      - Restrictive dispute resolution clauses
      
      For each risky phrase, provide:
-     - The exact text from the document
-     - The section or location where it appears
-     - The type of risk it represents
-     - Why it's concerning for users
+     - phrase: The exact text from the document
+     - location: The section or location where it appears
+     - risk_type: The type of risk it represents (e.g., "Liability", "Data Collection", "Term Changes", etc.)
      
      Focus on phrases that would be highlighted on a frontend interface to warn users.
      """,
