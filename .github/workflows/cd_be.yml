@@ -101,7 +101,7 @@ jobs:
             "r2_buckets": [
               {
                 "binding": "${{ vars.BINDING}}",
-                "bucket_name": "${{ vars.BUCKET_NAME }}"",
+                "bucket_name": "${{ vars.BUCKET_NAME }}",
               }
             ]
           }
