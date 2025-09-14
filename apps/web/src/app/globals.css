@@ -22,5 +22,69 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Apply Figtree globally, fall back to Geist variable and system fonts */
+  font-family:
+    var(--font-figtree, "Figtree"), var(--font-geist-sans), Arial, Helvetica,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Use Rubik for headings site-wide */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-rubik, "Rubik"), var(--font-geist-sans), sans-serif;
+  margin: 0;
+}
+
+/* Google Fonts utility classes - Figtree and Rubik
+   Usage:
+     - Use one of the utility classes on an element to apply the font and weight.
+     - Examples provided for common weights (400, 600, 800). Create more as needed.
+
+   Naming convention:
+     .figtree-<uniquifier>-<weight>
+     .rubik-<uniquifier>-<weight>
+
+   Example:
+     <h1 class="figtree-heading-800">Heading</h1>
+     <p class="rubik-body-400">Paragraph</p>
+*/
+
+.figtree-heading-400 {
+  font-family: "Figtree", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.figtree-heading-800 {
+  font-family: "Figtree", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.rubik-body-400 {
+  font-family: "Rubik", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.rubik-body-600 {
+  font-family: "Rubik", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* Fallback: apply Rubik or Figtree to the root variables if desired */
+:root {
+  --font-figtree: "Figtree", sans-serif;
+  --font-rubik: "Rubik", sans-serif;
 }

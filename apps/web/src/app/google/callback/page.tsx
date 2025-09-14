@@ -2,8 +2,9 @@
 import React, { useEffect } from 'react'
 import { useAuth } from '../../../hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
+import TailwindBoxLoader from '@/app/_components/loader';
 
-const page = () => {
+const GoogleCallback = () => {
    const searchParams = useSearchParams();
    const router = useRouter();
    const code = searchParams.get("code") as string;
@@ -27,8 +28,10 @@ const page = () => {
   }, []);
 
   return (
-    <div>page</div>
+    <div className='flex items-center justify-center w-screen h-screen'>
+        <TailwindBoxLoader />
+    </div>
   )
 }
 
-export default page
+export default GoogleCallback;
