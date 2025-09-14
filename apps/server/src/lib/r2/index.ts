@@ -1,5 +1,3 @@
-import { SignJWT } from 'jose';
-
 export class R2 {
 	private bucket: R2Bucket;
 	private baseUrl?: string;
@@ -57,17 +55,5 @@ export class R2 {
 	getPermanentUrl(key: string): string | null {
 		if (!this.baseUrl) return null;
 		return `${this.baseUrl.replace(/\/$/, '')}/files/${encodeURIComponent(key)}`;
-	}
-
-	// 🔹 Signed URL (expiring)
-	async getSignedUrl(key: string, expiresInSec: number): Promise<string | null> {
-		if (!this.baseUrl || !this.secret) return null;
-
-		const token = await new SignJWT({ key })
-			.setProtectedHeader({ alg: 'HS256' })
-			.setExpirationTime(`${expiresInSec}s`)
-			.sign(new TextEncoder().encode(this.secret));
-
-		return `${this.baseUrl.replace(/\/$/, '')}/files/signed/${encodeURIComponent(key)}?token=${token}`;
 	}
 }
