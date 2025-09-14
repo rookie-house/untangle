@@ -141,11 +141,11 @@ importers:
         specifier: ^20
         version: 20.19.13
       '@types/react':
-        specifier: ^19
+        specifier: ^19.1.0
         version: 19.1.0
       '@types/react-dom':
-        specifier: ^19
-        version: 19.1.1(@types/react@19.1.0)
+        specifier: ^19.1.0
+        version: 19.1.0(@types/react@19.1.0)
       eslint:
         specifier: ^9
         version: 9.34.0(jiti@2.5.1)
@@ -1619,6 +1619,11 @@ packages:
   '@types/node@24.3.2':
     resolution: {integrity: sha512-6L8PkB+m1SSb2kaGGFk3iXENxl8lrs7cyVl7AXH6pgdMfulDfM6yUrVdjtxdnGrLrGzzuav8fFnZMY+rcscqcA==}
 
+  '@types/react-dom@19.1.0':
+    resolution: {integrity: sha512-21E2zejNNRtjG4hKIyJz4aWswGEcNFTgttA0bZIRGjj1HA/tbSUxIJnIcYbn98pwJck0cS1bsQhn6eaKqbcFWw==}
+    peerDependencies:
+      '@types/react': ^19.0.0
+
   '@types/react-dom@19.1.1':
     resolution: {integrity: sha512-jFf/woGTVTjUJsl2O7hcopJ1r0upqoq/vIOoCj0yLh3RIXxWcljlpuZ+vEBRXsymD1jhfeJrlyTy/S1UW+4y1w==}
     peerDependencies:
@@ -3054,6 +3059,7 @@ packages:
 
   libsql@0.5.22:
     resolution: {integrity: sha512-NscWthMQt7fpU8lqd7LXMvT9pi+KhhmTHAJWUB/Lj6MWa0MKFv0F2V4C6WKKpjCVZl0VwcDz4nOI3CyaT1DDiA==}
+    cpu: [x64, arm64, wasm32, arm]
     os: [darwin, linux, win32]
 
   lie@3.3.0:
@@ -5043,6 +5049,10 @@ snapshots:
   '@types/node@24.3.2':
     dependencies:
       undici-types: 7.10.0
+
+  '@types/react-dom@19.1.0(@types/react@19.1.0)':
+    dependencies:
+      '@types/react': 19.1.0
 
   '@types/react-dom@19.1.1(@types/react@19.1.0)':
     dependencies:

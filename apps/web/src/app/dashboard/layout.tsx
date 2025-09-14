@@ -1,10 +1,8 @@
-import React from 'react'
-
-type Props = {
-    children: React.ReactNode
-}
-
-const Layout = ({ children }: Props) => {
+export default function Layout({
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
     return (
         <div className="min-h-screen flex flex-col">
             <header className="p-4 bg-gray-100">
@@ -19,5 +17,3 @@ const Layout = ({ children }: Props) => {
         </div>
     )
 }
-
-export default Layout
