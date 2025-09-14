@@ -24,4 +24,3 @@ app.route('/api', routes);
 app.get('/health', (ctx) => ctx.json({ status: 'ok' }));
 
 export default app;
-
