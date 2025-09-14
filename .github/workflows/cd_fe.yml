@@ -27,7 +27,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -42,6 +41,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: web
-          directory: apps/web/.vercel/output/static
+          projectName: untangle
+          directory: .vercel/output/static
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
