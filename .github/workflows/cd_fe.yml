@@ -54,7 +54,7 @@ jobs:
 
       - name: Deploy to CF Workers
         run: |
-          pnpm run deploy
+          pnpm run deploy:fe
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
