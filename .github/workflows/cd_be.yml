@@ -83,7 +83,7 @@ jobs:
         run: |
           cat > wrangler.jsonc <<EOF
           {
-            "name": "be-bonk-bot",
+            "name": "untangled-be",
             "account_id": "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}",
             "main": "src/index.ts",
             "compatibility_date": "$(date +%Y-%m-%d)",
@@ -97,7 +97,13 @@ jobs:
               "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
               "GOOGLE_REDIRECT_URI": "${{ secrets.GOOGLE_REDIRECT_URI }}",
               "FRONTEND_URL": "${{ vars.FRONTEND_URL }}"
-            }
+            },
+            "r2_buckets": [
+              {
+                "binding": "BUCKET",
+                "bucket_name": "untangle-assets",
+              }
+            ]
           }
           EOF
 
