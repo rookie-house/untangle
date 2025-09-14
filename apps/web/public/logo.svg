@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+  <title id="title">Untangle - Logo</title>
+  <desc id="desc">A modern, minimal logo with an 'untangling' ribbon icon and the wordmark "Untangle" in a clean geometric sans-serif. Designed for dark gray dashboard backgrounds.</desc>
+
+  <!-- Background rectangle (not needed when placed on your dashboard) left for preview only -->
+  <rect width="1200" height="400" fill="transparent" />
+
+  <!-- Define gradients -->
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#7dd3fc" />
+      <stop offset="100%" stop-color="#60a5fa" />
+    </linearGradient>
+    <linearGradient id="g2" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.96" />
+      <stop offset="100%" stop-color="#e6f7ff" stop-opacity="0.9" />
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="b" />
+      <feBlend in="SourceGraphic" in2="b" mode="normal" />
+    </filter>
+  </defs>
+
+  <!-- Icon: stylized untangling ribbon forming a 'U' and a knot -->
+  <g transform="translate(120,60)">
+    <!-- Underlay path (subtle thin glow) -->
+    <path d="M60 220 C30 160, 30 100, 120 90 C210 80, 210 180, 150 220 C110 250, 40 260, 40 300"
+          fill="none" stroke="url(#g1)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.14" />
+    <!-- Main ribbon -->
+    <path d="M60 220
+             C40 170, 40 110, 120 95
+             C200 80, 200 170, 150 210
+             C120 235, 80 240, 60 280"
+          fill="none" stroke="url(#g1)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Overlapping stroke to create the 'untangling' overlap -->
+    <path d="M120 95
+             C190 90, 200 140, 160 180"
+          fill="none" stroke="#0f172a" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Inner highlight to give depth -->
+    <path d="M66 218
+             C50 175, 50 120, 120 105
+             C190 90, 190 165, 150 200
+             C120 225, 78 235, 66 272"
+          fill="none" stroke="url(#g2)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Wordmark: "Untangle" -->
+  <g transform="translate(360,160)">
+    <text x="0" y="36" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-weight="700" font-size="64" fill="url(#g2)">
+      Untangle
+    </text>
+    <!-- Tagline (optional, smaller) -->
+    <text x="0" y="70" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-weight="500" font-size="16" fill="#cbd5e1" opacity="0.9">
+      Simplify legal docs • Flag risks • Protect privacy
+    </text>
+  </g>
+</svg>
