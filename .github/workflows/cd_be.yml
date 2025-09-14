@@ -57,14 +57,6 @@ jobs:
         with:
           version: 10
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: apps/server/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('apps/server/pnpm-lock.yaml', 'apps/server/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
       - name: Install dependencies
         run: pnpm install
 
@@ -89,7 +81,7 @@ jobs:
              "compatibility_flags": ["nodejs_compat"],
             "vars": {
               "TURSO_DATABASE_URL": "${{ secrets.TURSO_DATABASE_URL }}",
-              "TURSO_AUTH_TOKEN": "${{ secrets.TURSO_DATABASE_URL }}",
+              "TURSO_AUTH_TOKEN": "${{ secrets.TURSO_AUTH_TOKEN }}",
               "SALT": "${{ secrets.SALT }}",
               "JWT_SECRET": "${{ secrets.BE_JWT_SECRET }}",
               "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
