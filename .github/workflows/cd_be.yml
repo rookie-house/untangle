@@ -1,0 +1,101 @@
+name: deploy be
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/server/**"
+      - ".github/workflows/cd_be.yml"
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.changes.outputs.server }}
+      migrations: ${{ steps.changes.outputs.migrations }}
+    steps:
+      - name: Checkout for changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        id: changes
+        run: |
+          # Check if server files changed
+          if git diff --name-only HEAD~1 HEAD | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
+            echo "server=true" >> $GITHUB_OUTPUT
+          else
+            echo "server=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check if migration files changed
+          if git diff --name-only HEAD~1 HEAD | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
+            echo "migrations=true" >> $GITHUB_OUTPUT
+          else
+            echo "migrations=false" >> $GITHUB_OUTPUT
+          fi
+  deploy:
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: apps/server/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('apps/server/pnpm-lock.yaml', 'apps/server/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate and run migrations
+        if: needs.changes.outputs.migrations == 'true'
+        run: |
+          echo "Migration files changed, running migrations..."
+          pnpm drizzle:generate
+          pnpm drizzle:migrate
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+
+      - name: Generate wrangler.jsonc
+        run: |
+          cat > wrangler.jsonc <<EOF
+          {
+            "name": "be-bonk-bot",
+            "account_id": "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}",
+            "main": "src/index.ts",
+            "compatibility_date": "$(date +%Y-%m-%d)",
+             "compatibility_flags": ["nodejs_compat"],
+            "vars": {
+              "TURSO_DATABASE_URL": "${{ secrets.TURSO_DATABASE_URL }}",
+              "TURSO_AUTH_TOKEN": "${{ secrets.TURSO_DATABASE_URL }}",
+              "SALT": "${{ secrets.SALT }}",
+              "JWT_SECRET": "${{ secrets.BE_JWT_SECRET }}",
+              "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
+              "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
+              "GOOGLE_REDIRECT_URI": "${{ secrets.GOOGLE_REDIRECT_URI }}",
+              "FRONTEND_URL": "${{ vars.FRONTEND_URL }}"
+            }
+          }
+          EOF
+
+      - name: Deploy to Workers
+        run: pnpm wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
