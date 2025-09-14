@@ -141,6 +141,7 @@ export class AuthService {
 			throw new Error(dbError);
 		}
 
+		
 		const user = await db
 			.insert(users)
 			.values({
@@ -161,6 +162,7 @@ export class AuthService {
 				profilePic: users.profilePic,
 			})
 			.get();
+
 
 		if (!user) {
 			throw new Error('Failed to create or update user.');
