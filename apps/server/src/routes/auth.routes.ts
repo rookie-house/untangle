@@ -1,7 +1,6 @@
-import { AuthController } from '@/controller';
 import { hono } from '@/lib/hono';
+import { AuthController } from '@/controller';
 import { authValidator } from '@/lib/validator/auth.validator';
-import type { Context } from 'hono';
 
 const app = hono();
 
