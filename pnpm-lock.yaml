@@ -93,7 +93,7 @@ importers:
     devDependencies:
       '@cloudflare/next-on-pages':
         specifier: ^1.13.16
-        version: 1.13.16(next@15.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(wrangler@4.36.0)
+        version: 1.13.16(@cloudflare/workers-types@4.20250913.0)(next@15.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(wrangler@4.36.0(@cloudflare/workers-types@4.20250913.0))
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.3.1
@@ -3465,7 +3465,7 @@ snapshots:
     dependencies:
       mime: 3.0.0
 
-  '@cloudflare/next-on-pages@1.13.16(next@15.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(wrangler@4.36.0)':
+  '@cloudflare/next-on-pages@1.13.16(@cloudflare/workers-types@4.20250913.0)(next@15.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(wrangler@4.36.0(@cloudflare/workers-types@4.20250913.0))':
     dependencies:
       acorn: 8.15.0
       ast-types: 0.14.2
@@ -3480,7 +3480,9 @@ snapshots:
       package-manager-manager: 0.2.0
       pcre-to-regexp: 1.1.0
       semver: 7.7.2
-      wrangler: 4.36.0
+      wrangler: 4.36.0(@cloudflare/workers-types@4.20250913.0)
+    optionalDependencies:
+      '@cloudflare/workers-types': 4.20250913.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
