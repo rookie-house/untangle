@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "apps/web/**"
+      - ".github/workflows/cd_fe.yml"
   workflow_dispatch:
 
 env:
