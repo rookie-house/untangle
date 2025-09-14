@@ -26,11 +26,11 @@ export const documents = sqliteTable(
 			.$defaultFn(() => new Date()),
 	},
 	(t) => [
-		uniqueIndex('users_sessionId_idx').on(t.sessionId),
-		index('users_title_idx').on(t.title),
-		index('users_userId_idx').on(t.userId),
-		index('users_type_idx').on(t.type),
-		index('users_title_idx').on(t.title),
+		uniqueIndex('documents_sessionId_idx').on(t.sessionId),
+		index('documents_title_idx').on(t.title),
+		index('documents_userId_idx').on(t.userId),
+		index('documents_type_idx').on(t.type),
+		index('documents_title_idx').on(t.title),
 	],
 );
 

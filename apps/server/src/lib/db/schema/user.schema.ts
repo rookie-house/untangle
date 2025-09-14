@@ -20,10 +20,7 @@ export const users = sqliteTable(
 			.notNull()
 			.$defaultFn(() => new Date()),
 	},
-	(t) => [
-		uniqueIndex('users_email_idx').on(t.email),
-		index('users_name_idx').on(t.name),
-	],
+	(t) => [uniqueIndex('users_email_idx').on(t.email), index('users_name_idx').on(t.name)],
 );
 
 export const userRelations = relations(users, ({ many }) => ({
