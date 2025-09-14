@@ -124,6 +124,7 @@ export class AuthService {
 		});
 
 		const tokens = await google.getTokens(code);
+		console.log(tokens)
 
 		if (!tokens || !tokens.access_token) {
 			throw new Error('Failed to retrieve Google tokens.');
@@ -131,15 +132,22 @@ export class AuthService {
 
 		const me = await google.me(tokens.access_token);
 
+		console.log(me)
 		if (!me || !me.email) {
 			throw new Error('Failed to retrieve user info from Google.');
 		}
 
 		const { db, error: dbError } = await initializeDatabase(ctx);
 
+		console.log("DB ", db)
 		if (dbError || !db) {
 			throw new Error(dbError);
 		}
+
+		console.log("Final Data :", {
+			"me" :me.email,
+			"google accesstoken:": tokens.access_token
+		})
 
 		const user = await db
 			.insert(users)
@@ -162,6 +170,8 @@ export class AuthService {
 			})
 			.get();
 
+
+		console.log("USer Crated :",user)
 		if (!user) {
 			throw new Error('Failed to create or update user.');
 		}

@@ -9,6 +9,7 @@ export class AuthController {
 			// @ts-ignore
 			const { email, password }: AuthValidator = ctx.req.valid('json');
 			const user = await AuthService.signup({ ctx, email, password });
+			
 			return ctx.json(
 				api_response({
 					message: 'User created successfully',
@@ -20,12 +21,13 @@ export class AuthController {
 		} catch (error) {
 			return ctx.json(api_response({ message: error instanceof Error ? error.message : 'signup failed', is_error: true }), 400);
 		}
-	};
+	};		
 	public static readonly signin = async (ctx: Context) => {
 		try {
 			// @ts-ignore
 			const { email, password }: AuthValidator = ctx.req.valid('json');
 			const user = await AuthService.signin({ ctx, email, password });
+			console.log(user)
 			return ctx.json(
 				api_response({
 					message: 'User signed in',
@@ -55,7 +57,7 @@ export class AuthController {
 	public static readonly googleCallback = async (ctx: Context) => {
 		try {
 			const { code } = ctx.req.query();
-
+			console.log("Code :",code)
 			if (!code) {
 				return ctx.json(
 					api_response({
