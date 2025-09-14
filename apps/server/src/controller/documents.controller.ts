@@ -20,13 +20,9 @@ export class DocumentsController {
 
 			const body = await ctx.req.parseBody();
 			const file = body['file'];
-			const sessionId = body['sessionId'];
 
 			if (!(file instanceof File)) {
 				return ctx.json({ error: 'No file uploaded' }, 400);
-			}
-			if (typeof sessionId !== 'string') {
-				return ctx.json({ error: 'Missing sessionId' }, 400);
 			}
 
 			const buffer = await file.arrayBuffer();
@@ -36,7 +32,6 @@ export class DocumentsController {
 				fileName: file.name,
 				body: buffer,
 				userId: user.id,
-				sessionId,
 				type: file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : 'other',
 				db,
 			});

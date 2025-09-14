@@ -16,7 +16,7 @@ export const documents = sqliteTable(
 		r2_key: text().notNull(),
 		url: text().notNull(),
 		userId: int().notNull(),
-		sessionId: int().notNull(),
+		sessionId: text(),
 		updatedAt: int({ mode: 'timestamp' })
 			.notNull()
 			.$defaultFn(() => new Date())
