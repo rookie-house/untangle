@@ -1,46 +1,57 @@
-name: deploy fe
-
+name: Deploy to Cloudflare Workers
 on:
   push:
     branches:
       - main
-    paths:
-      - "apps/web/**"
-      - ".github/workflows/cd_fe.yml"
+  workflow_dispatch:
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 jobs:
-  deploy:
+  version:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
-
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        node-version: [20]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: checkout code repository
+        uses: actions/checkout@v3
         with:
-          node-version: 20
+          fetch-depth: 0
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Next.js with next-on-pages
-        run: pnpm build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          # add any other build-time envs here
-
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: untangle
-          command: pages deploy apps/web/.next/static --project-name=${{vars.PROJECT_NAME}}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: install pnpm
+        run: npm i pnpm@latest -g
+
+      - name: setup pnpm config
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+
+      - name: install dependencies
+        run: pnpm install
+
+      - name: Create .env file
+        run: |
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" > .env
+
+      - name: Deploy to CF Workers
+        run: |
+          pnpm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
