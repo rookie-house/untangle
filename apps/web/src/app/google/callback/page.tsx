@@ -1,19 +1,19 @@
 "use client"
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useAuth } from '../../../hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import TailwindBoxLoader from '@/app/_components/loader';
 
-const GoogleCallback = () => {
-   const searchParams = useSearchParams();
-   const router = useRouter();
-   const code = searchParams.get("code") as string;
-   const state = searchParams.get("state") as string;
+export default function GoogleCallback() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const code = searchParams.get("code") as string;
+  const state = searchParams.get("state") as string;
 
-   console.log({ code, state });
-   const { handleGoogleCallback } = useAuth();
+  console.log({ code, state });
+  const { handleGoogleCallback } = useAuth();
 
-   useEffect(() => {
+  useEffect(() => {
     if (code) {
       const callbackResponse = handleGoogleCallback({ code });
 
@@ -29,9 +29,7 @@ const GoogleCallback = () => {
 
   return (
     <div className='flex items-center justify-center w-screen h-screen'>
-        <TailwindBoxLoader />
+      <TailwindBoxLoader />
     </div>
   )
 }
-
-export default GoogleCallback;
