@@ -9,12 +9,52 @@ on:
       - ".github/workflows/cd_be.yml"
 
 jobs:
-  migrate:
+  changes:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[migrations]') ||
-      contains(join(github.event.commits.*.modified), 'apps/server/drizzle') ||
-      contains(join(github.event.commits.*.modified), 'apps/server/migrations') ||
-      contains(join(github.event.commits.*.modified), '.sql')
+    outputs:
+      server: ${{ steps.changes.outputs.server }}
+      migrations: ${{ steps.changes.outputs.migrations }}
+    steps:
+      - name: Checkout for changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Debug commit SHAs
+        run: |
+          echo "Before SHA: ${{ github.event.before }}"
+          echo "After SHA:  ${{ github.sha }}"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          # Compare the commit before the push with the current HEAD
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} HEAD || true)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
+            echo "server=true" >> $GITHUB_OUTPUT
+          else
+            echo "server=false" >> $GITHUB_OUTPUT
+          fi
+
+          if echo "$CHANGED_FILES" | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
+            echo "migrations=true" >> $GITHUB_OUTPUT
+          else
+            echo "migrations=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Debug outputs
+        run: |
+          echo "Server change detected: ${{ steps.changes.outputs.server }}"
+          echo "Migrations change detected: ${{ steps.changes.outputs.migrations }}"
+
+  migrate:
+    needs: changes
+    if: needs.changes.outputs.migrations == 'true'
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/server
@@ -45,9 +85,11 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
 
   deploy:
+    needs:
+      - changes
+      - migrate
+    if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
-    needs: [migrate]
-    if: contains(join(github.event.commits.*.modified), 'apps/server/')
     defaults:
       run:
         working-directory: apps/server
