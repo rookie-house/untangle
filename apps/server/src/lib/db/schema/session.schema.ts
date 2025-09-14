@@ -12,7 +12,7 @@ export const sessions = sqliteTable(
 		updatedAt: int({ mode: 'timestamp' }).notNull().$defaultFn(() => new Date()).$onUpdateFn(() => new Date()),
 		createdAt: int({ mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 	},
-	(t) => [uniqueIndex('users_sessionId_idx').on(t.id), index('users_title_idx').on(t.title)],
+	(t) => [uniqueIndex('users_title_idx').on(t.title), index('users_title_idx').on(t.title)],
 );
 
 export const sessionRelations = relations(sessions, ({one, many}) => ({

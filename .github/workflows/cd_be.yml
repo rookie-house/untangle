@@ -18,24 +18,35 @@ jobs:
       - name: Checkout for changes
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0 # fetch full history so git diff works reliably
 
       - name: Check for changes
         id: changes
         run: |
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
           # Check if server files changed
-          if git diff --name-only HEAD~1 HEAD | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
+          if echo "$CHANGED_FILES" | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
             echo "server=true" >> $GITHUB_OUTPUT
           else
             echo "server=false" >> $GITHUB_OUTPUT
           fi
 
           # Check if migration files changed
-          if git diff --name-only HEAD~1 HEAD | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
+          if echo "$CHANGED_FILES" | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
             echo "migrations=true" >> $GITHUB_OUTPUT
           else
             echo "migrations=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Debug outputs
+        run: |
+          echo "Server change detected: ${{ steps.changes.outputs.server }}"
+          echo "Migrations change detected: ${{ steps.changes.outputs.migrations }}"
+
   deploy:
     needs: changes
     if: needs.changes.outputs.server == 'true'
@@ -52,16 +63,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: apps/server/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('apps/server/pnpm-lock.yaml', 'apps/server/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Generate and run migrations
         if: needs.changes.outputs.migrations == 'true'
@@ -77,21 +83,27 @@ jobs:
         run: |
           cat > wrangler.jsonc <<EOF
           {
-            "name": "be-bonk-bot",
+            "name": "untangled-be",
             "account_id": "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}",
             "main": "src/index.ts",
             "compatibility_date": "$(date +%Y-%m-%d)",
-             "compatibility_flags": ["nodejs_compat"],
+            "compatibility_flags": ["nodejs_compat"],
             "vars": {
               "TURSO_DATABASE_URL": "${{ secrets.TURSO_DATABASE_URL }}",
-              "TURSO_AUTH_TOKEN": "${{ secrets.TURSO_DATABASE_URL }}",
+              "TURSO_AUTH_TOKEN": "${{ secrets.TURSO_AUTH_TOKEN }}",
               "SALT": "${{ secrets.SALT }}",
               "JWT_SECRET": "${{ secrets.BE_JWT_SECRET }}",
               "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
               "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
               "GOOGLE_REDIRECT_URI": "${{ secrets.GOOGLE_REDIRECT_URI }}",
               "FRONTEND_URL": "${{ vars.FRONTEND_URL }}"
-            }
+            },
+            "r2_buckets": [
+              {
+                "binding": "${{ vars.BINDING}}",
+                "bucket_name": "${{ vars.BUCKET_NAME }}"",
+              }
+            ]
           }
           EOF
 

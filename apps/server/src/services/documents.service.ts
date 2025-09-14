@@ -66,7 +66,7 @@ export class DocumentsService {
 		pageSize: number;
 		offset: number;
 	}) => {
-		const documentsList = await db.select().from(documents).where(eq(documents.userId, userId)).limit(pageSize).offset(offset).all();
+		const documentsList = await db.select().from(documents).where(eq(documents.userId, userId)).limit(pageSize).offset(offset);
 
 		if (!documentsList) {
 			throw new Error('No documents found for the user');
@@ -97,5 +97,32 @@ export class DocumentsService {
 		}
 
 		return { document };
+	};
+
+	public static readonly getDocumentsBySessionId = async ({
+		sessionId,
+		db,
+		userId,
+		pageSize,
+		offset,
+	}: {
+		sessionId: string;
+		userId: number;
+		db: DbType;
+		pageSize: number;
+		offset: number;
+	}) => {
+		const documentsList = await db
+			.select()
+			.from(documents)
+			.where(eq(documents.sessionId, Number(sessionId)) && eq(documents.userId, userId))
+			.limit(pageSize)
+			.offset(offset);
+
+		if (!documentsList) {
+			throw new Error('No documents found for the session');
+		}
+
+		return { documents: documentsList };
 	};
 }
