@@ -100,8 +100,8 @@ jobs:
             },
             "r2_buckets": [
               {
-                "binding": "BUCKET",
-                "bucket_name": "untangle-assets",
+                "binding": "${{ vars.BINDING}}",
+                "bucket_name": "${{ vars.BUCKET_NAME }}"",
               }
             ]
           }
