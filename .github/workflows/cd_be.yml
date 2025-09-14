@@ -18,28 +18,25 @@ jobs:
       - name: Checkout for changes
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Debug commit SHAs
-        run: |
-          echo "Before SHA: ${{ github.event.before }}"
-          echo "After SHA:  ${{ github.sha }}"
+          fetch-depth: 0 # fetch full history so git diff works reliably
 
       - name: Check for changes
         id: changes
         run: |
-          # Compare the commit before the push with the current HEAD
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} HEAD || true)
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
 
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
+          # Check if server files changed
           if echo "$CHANGED_FILES" | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
             echo "server=true" >> $GITHUB_OUTPUT
           else
             echo "server=false" >> $GITHUB_OUTPUT
           fi
 
+          # Check if migration files changed
           if echo "$CHANGED_FILES" | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
             echo "migrations=true" >> $GITHUB_OUTPUT
           else
@@ -51,41 +48,8 @@ jobs:
           echo "Server change detected: ${{ steps.changes.outputs.server }}"
           echo "Migrations change detected: ${{ steps.changes.outputs.migrations }}"
 
-  migrate:
-    needs: changes
-    if: needs.changes.outputs.migrations == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/server
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run migrations
-        run: |
-          echo "Migration files changed, running migrations..."
-          pnpm drizzle:generate
-          pnpm drizzle:migrate
-        env:
-          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-
   deploy:
-    needs:
-      - changes
-      - migrate
+    needs: changes
     if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
     defaults:
@@ -102,9 +66,21 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate and run migrations
+        if: needs.changes.outputs.migrations == 'true'
+        run: |
+          echo "Migration files changed, running migrations..."
+          pnpm drizzle:generate
+          pnpm drizzle:migrate
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
 
       - name: Generate wrangler.jsonc
         run: |
