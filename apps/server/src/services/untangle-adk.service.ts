@@ -31,7 +31,7 @@ export class UntangleADKService {
 	};
 
 	// TODO: add session title
-	public static readonly runFirstChat = async ({
+	public static readonly start = async ({
 		ctx,
 		db,
 		userId,
@@ -51,29 +51,35 @@ export class UntangleADKService {
 			mimeType: string;
 		}[];
 	}) => {
-		
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
-    if (!sessionId) {
+
+		if (!sessionId) {
 			sessionId = crypto.randomUUID();
-		}
-
-		let session = await adk.createSession({ sessionId, userId });
-
-		if (!session) {
-			await adk.createSession({ sessionId, userId });
+			const session = await adk.createSession({ sessionId, userId });
+			if (!session) {
+				throw new Error('Failed to create new session');
+			}
+		} else {
+			const sessionExists = await adk.getSession({ userId, sessionId });
+			if (!sessionExists) {
+				const session = await adk.createSession({ sessionId, userId });
+				if (!session) {
+					throw new Error('Failed to create session with provided sessionId');
+				}
+			}
 		}
 
 		let files: IFiles[] = [];
 
-		if (rawFiles) {
-			for (const file of rawFiles) {
-				await db
+		if (rawFiles && rawFiles.length > 0) {
+			const documentUpdates = rawFiles.map((file) =>
+				db
 					.update(documents)
-					.set({
-						sessionId: sessionId,
-					})
-					.where(and(eq(documents.r2_key, file.id), eq(documents.userId, userId)));
-			}
+					.set({ sessionId })
+					.where(and(eq(documents.r2_key, file.id), eq(documents.userId, userId))),
+			);
+
+			await Promise.all(documentUpdates);
 
 			files = rawFiles.map((file) => ({
 				displayName: file.displayName,

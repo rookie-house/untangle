@@ -41,7 +41,7 @@ export class UntangleADKController {
 		}
 	};
 
-	public static starts = async (ctx: Context) => {
+	public static readonly start = async (ctx: Context) => {
 		try {
 			const user = ctx.get('user') as IUserContext;
 			if (!user) {
@@ -56,7 +56,7 @@ export class UntangleADKController {
 				return ctx.json(api_response({ message: 'Database not found', is_error: true }), 404);
 			}
 
-			const messageResponse = await UntangleADKService.runFirstChat({
+			const messageResponse = await UntangleADKService.start({
 				ctx,
 				db,
 				userId: user.id,
