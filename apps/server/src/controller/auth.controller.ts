@@ -27,7 +27,6 @@ export class AuthController {
 			// @ts-ignore
 			const { email, password }: AuthValidator = ctx.req.valid('json');
 			const user = await AuthService.signin({ ctx, email, password });
-			console.log(user)
 			return ctx.json(
 				api_response({
 					message: 'User signed in',
@@ -57,7 +56,6 @@ export class AuthController {
 	public static readonly googleCallback = async (ctx: Context) => {
 		try {
 			const { code } = ctx.req.query();
-			console.log("Code :",code)
 			if (!code) {
 				return ctx.json(
 					api_response({

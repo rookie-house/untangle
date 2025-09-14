@@ -40,15 +40,15 @@ export default function RootLayout({
       >
         <Suspense fallback={<div />}>
           <Providers>
-             <div className="fixed top-4  z-50 flex items-center space-x-4 h-20">
+             <div className="fixed top-4 z-50 flex items-center space-x-4 h-20">
                     <Link href="/" className="flex items-center h-full">
                       <Image
                     src="/logo.svg"
                     alt="Untangle Logo"
                     width={140}
                     height={70}
-                    className="h-72 w-auto"
-                      />
+                    className="h-[70px] w-auto"
+                    />
                     </Link>
                     <div className="h-full flex items-center">
                       <FloatingHeader />
