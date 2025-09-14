@@ -4,7 +4,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import TailwindBoxLoader from '@/app/_components/loader';
 
-const page = () => {
+const GoogleCallback = () => {
    const searchParams = useSearchParams();
    const router = useRouter();
    const code = searchParams.get("code") as string;
@@ -34,4 +34,4 @@ const page = () => {
   )
 }
 
-export default page
+export default GoogleCallback;
