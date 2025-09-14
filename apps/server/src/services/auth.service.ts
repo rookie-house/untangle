@@ -45,7 +45,7 @@ export class AuthService {
 			user: { id: newUser.id },
 		});
 
-		return { token, user: { id: newUser.id, email: newUser.email } };
+		return { token, user: { id: newUser.id, email: newUser.email, name: newUser.name, profilePic: newUser.profilePic } };
 	};
 
 	public static readonly signin = async ({ ctx, email, password }: { ctx: Context; email: string; password: string }) => {
@@ -87,7 +87,7 @@ export class AuthService {
 			secret: ctx.env.JWT_SECRET,
 		});
 
-		return { token, user: { id: user.id, email: user.email } };
+		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
 	};
 
 	public static readonly googleAuthUrl = async ({ ctx }: { ctx: Context }) => {
@@ -145,18 +145,20 @@ export class AuthService {
 			.insert(users)
 			.values({
 				email: me.email,
-				googleAccess: tokens.access_token,
+				google_access_token: tokens.access_token,
 			})
 			.onConflictDoUpdate({
 				target: users.email,
 				set: {
-					googleAccess: tokens.access_token,
+					google_access_token: tokens.access_token,
 				},
 			})
 			.returning({
 				id: users.id,
 				email: users.email,
-				googleAccess: users.googleAccess,
+				google_access_token: users.google_access_token,
+				name: users.name,
+				profilePic: users.profilePic,
 			})
 			.get();
 
@@ -169,7 +171,7 @@ export class AuthService {
 			secret: ctx.env.JWT_SECRET,
 		});
 
-		return { token, user: { id: user.id, email: user.email } };
+		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
 	};
 
 	private static async _hashPass({ password, salt }: { password: string; salt: string }): Promise<string> {
