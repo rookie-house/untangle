@@ -12,6 +12,7 @@ app.use('*', async (c, next) => {
 		origin: ['http://localhost:3000', 'https://untangle.rookie.house'],
 		allowMethods: ['GET', 'POST', 'PUT', 'DELETE', "OPTIONS"],
 		allowHeaders: ['Content-Type', 'Authorization'],
+		credentials: true,
 	});
 	return corsMiddleware(c, next);
 });
