@@ -105,7 +105,7 @@ export class UntangleADKService {
 			max_length: 10,
 		});
 		if (!session_name) {
-			session_name = 'Untitled'
+			session_name = 'Untitled';
 		}
 
 		await db.insert(sessions).values({
