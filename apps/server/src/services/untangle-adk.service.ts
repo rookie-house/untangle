@@ -97,7 +97,6 @@ export class UntangleADKService {
 			rawFiles: Array.isArray(files) ? files : [],
 			streaming: false
 		});
-		console.log('response', response);
 
 		let session_name = await WorkerAI.run({
 			ctx,
