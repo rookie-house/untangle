@@ -1,45 +1,243 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Reset and container scoping */
+.popup-container {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  width: 100vw;
+  max-width: 100%;
+  min-width: 350px;
+  min-height: 100px;
+  background: #111827;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Ensure all child elements use border-box */
+.popup-container *,
+.popup-container *::before,
+.popup-container *::after {
+  box-sizing: border-box;
+}
+
+/* Header Styles */
+.popup-header {
+  background: rgba(17, 24, 39, 0.4);
+  color: white;
+  padding: 20px;
   text-align: center;
+  width: 100%;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-.logo.crx:hover {
-  filter: drop-shadow(0 0 2em #f2bae4aa);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-@keyframes logo-spin {
+.logo-icon {
+  color: white;
+}
+
+.company-info {
+  text-align: left;
+}
+
+.company-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.tagline {
+  font-size: 12px;
+  opacity: 0.9;
+  margin: 2px 0 0 0;
+  line-height: 1.2;
+}
+
+/* Actions Container */
+.actions-container {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  width: 100%;
+}
+
+/* Button Styles */
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: none;
+  outline: none;
+  min-height: 44px;
+  width: 100%;
+}
+
+.primary-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  font-weight: 300;
+}
+
+.primary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  font-weight: 300;
+}
+
+.secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Status Messages */
+.status-message {
+  margin: 0 20px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  animation: slideIn 0.3s ease;
+  width: calc(100% - 40px);
+}
+
+.status-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+@keyframes slideIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(-10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+/* Colorful Icons - Updated for Lucide SVG icons */
+.action-btn svg {
+  filter: none;
+  transition: color 0.2s ease;
+}
+
+.primary-btn svg {
+  color: #60a5fa; /* Blue */
+  stroke: #60a5fa;
+}
+
+.secondary-btn svg {
+  color: #34d399; /* Green */
+  stroke: #34d399;
+}
+
+/* Specific icon colors for different actions */
+.action-btn[data-action="screenshot"] svg {
+  color: #f59e0b; /* Amber */
+  stroke: #f59e0b;
+}
+
+.action-btn[data-action="record"] svg {
+  color: #ef4444; /* Red */
+  stroke: #ef4444;
+}
+
+.action-btn[data-action="settings"] svg {
+  color: #8b5cf6; /* Purple */
+  stroke: #8b5cf6;
+}
+
+.action-btn[data-action="help"] svg {
+  color: #06b6d4; /* Cyan */
+  stroke: #06b6d4;
+}
+
+.action-btn[data-action="save"] svg {
+  color: #10b981; /* Emerald */
+  stroke: #10b981;
+}
+
+.action-btn[data-action="share"] svg {
+  color: #f97316; /* Orange */
+  stroke: #f97316;
+}
+
+/* Hover effects for icons */
+.action-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .popup-container {
+    min-width: 320px;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  
+  .actions-container {
+    padding: 20px 16px;
+  }
+  
+  .popup-header {
+    padding: 16px;
+  }
+  
+  .status-message {
+    margin: 0 16px;
+    width: calc(100% - 32px);
+  }
 }
