@@ -1,10 +1,10 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
-import { LibSQLDatabase } from "drizzle-orm/libsql";
-import * as schema from "./schema";
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
+import * as schema from './schema';
+import type { DbType } from '@/types/user';
 
 export class DbClient {
-	private instance: LibSQLDatabase<typeof schema> | null = null;
+	private instance: DbType | null = null;
 
 	constructor(private connection: { url: string; authToken: string }) {}
 
