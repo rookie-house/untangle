@@ -7,13 +7,10 @@ export default function Layout({
 }>) {
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="p-4 bg-gray-100">
-                <h1 className="text-2xl font-bold">Dashboard</h1>
-            </header>
-            <main className="flex-1 p-8">
+            <main className="flex-1">
                 {children}
             </main>
-            <footer className="p-4 bg-gray-100 text-center">
+            <footer className="p-4 bg-background text-sm text-center">
                 &copy; {new Date().getFullYear()} Untangle
             </footer>
         </div>

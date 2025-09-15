@@ -8,8 +8,18 @@ export default function Home() {
   return (
     <>
 
-      <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 px-6 pt-80 flex flex-col items-center">
+      <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 px-6 pt-40 flex flex-col items-center">
         <section className="w-full max-w-5xl text-center">
+          {/* Logo Image */}
+          <div className="">
+            <Image
+              src="/logo.png"
+              alt="Untangle Logo"
+              width={150}
+              height={150}
+              className="mx-auto mb-4"
+            />
+          </div>
           {/* Hero Section */}
           <h1 className="text-4xl md:text-5xl font-bold text-gray-100 leading-tight mb-4">
             Cut Through Legal Jargon with Clarity
