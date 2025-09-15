@@ -26,9 +26,6 @@ export const api_response = ({
 		message,
 	};
 
-	if (data !== null) {
-		response.data = data;
-	}
 
 	return response;
 };
