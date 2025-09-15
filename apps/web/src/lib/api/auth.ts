@@ -1,23 +1,27 @@
-import axios from "axios";
+import { Axios } from "axios";
 
-const API_URL = "http://localhost:8787";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
 
-export async function signup(data: {
-	name: string;
-	email: string;
-	password: string;
-}) {
-	return axios.post(`${API_URL}/api/auth/signup`, data);
-}
+export class Auth {
+	axios: Axios;
 
-export async function signin(data: { email: string; password: string }) {
-	return axios.post(`${API_URL}/api/auth/signin`, data);
-}
+	constructor(axiosInstance: Axios) {
+		this.axios = axiosInstance;
+	}
 
-export async function googleSignIn() {
-	return axios.get(`${API_URL}/api/auth/google`);
-}
+	async signup(data: { name: string; email: string; password: string }) {
+		return this.axios.post(`${API_URL}/api/auth/signup`, data);
+	}
 
-export async function googleCallback(params: Record<string, string>) {
-	return axios.get(`${API_URL}/api/auth/google/callback`, { params });
+	async signin(data: { email: string; password: string }) {
+		return this.axios.post(`${API_URL}/api/auth/signin`, data);
+	}
+
+	async googleSignIn() {
+		return this.axios.get(`${API_URL}/api/auth/google`);
+	}
+
+	async googleCallback(params: Record<string, string>) {
+		return this.axios.get(`${API_URL}/api/auth/google/callback`, { params });
+	}
 }
