@@ -69,9 +69,11 @@ export class UntangleADK {
 			rawFiles && rawFiles.length > 0
 				? [
 					...rawFiles.map((file) => ({
-						displayName: file.displayName,
-						fileUri: file.fileUri,
-						mimeType: file.mimeType,
+						fileData: {
+							displayName: file.displayName,
+							fileUri: file.fileUri,
+							mimeType: file.mimeType,
+						},
 					})),
 					{ text: message },
 				]
