@@ -1,7 +1,7 @@
 interface Response {
 	success: boolean;
 	message: unknown;
-	data?: unknown;
+	data?: unknown | null;
 }
 
 /**
@@ -17,15 +17,16 @@ export const api_response = ({
 	is_error = false,
 }: {
 	message: unknown;
-	data?: unknown;
+	data?: unknown | null;
 	is_error?: boolean;
 }) => {
 	const response: Response = {
 		success: !is_error,
+		data: data || null,
 		message,
 	};
 
-	if (data) {
+	if (data !== null) {
 		response.data = data;
 	}
 

@@ -81,13 +81,18 @@ export class UntangleADKController {
 	public static readonly deleteSession = async (ctx: Context) => {
 		try {
 			const user = ctx.get('user') as IUserContext;
+			const db = ctx.get('db').instance as DbType;
+
+			if (!db) {
+				return ctx.json(api_response({ message: 'Database not found', is_error: true }), 404);
+			}
 
 			if (!user) {
 				return ctx.json(api_response({ message: 'Unauthorized', is_error: true }), 401);
 			}
 
 			const sessionId = ctx.req.param('id');
-			const result = await UntangleADKService.deleteSession({ ctx, userId: user.id, sessionId });
+			const result = await UntangleADKService.deleteSession({ ctx, db, userId: user.id, sessionId });
 
 			return ctx.json(api_response({ data: result, message: 'Session deleted successfully' }));
 		} catch (error) {

@@ -1,6 +1,8 @@
-import { documents } from '@/lib/db/schema';
+import { documents, sessions } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import { UntangleADK } from '@/lib/untangle-adk';
+import { parseAdkResponse, removeSpecialCharacters } from '@/lib/utils/parse';
+import { WorkerAI } from '@/lib/worker-ai';
 import type { IFiles } from '@/types/untangle-adk.types';
 import type { DbType } from '@/types/user';
 import { and, eq } from 'drizzle-orm';
@@ -30,7 +32,7 @@ export class UntangleADKService {
 		return session;
 	};
 
-	// TODO: add session title
+
 	public static readonly start = async ({
 		ctx,
 		db,
@@ -52,13 +54,13 @@ export class UntangleADKService {
 		}[];
 	}) => {
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
-
 		if (!sessionId) {
 			sessionId = crypto.randomUUID();
 			const session = await adk.createSession({ sessionId, userId });
 			if (!session) {
 				throw new Error('Failed to create new session');
 			}
+
 		} else {
 			const sessionExists = await adk.getSession({ userId, sessionId });
 			if (!sessionExists) {
@@ -92,13 +94,31 @@ export class UntangleADKService {
 			userId,
 			sessionId,
 			message,
-			rawFiles: files,
+			rawFiles: Array.isArray(files) ? files : [],
+			streaming: false
+		});
+		console.log('response', response);
+
+		let session_name = await WorkerAI.run({
+			ctx,
+			input_text: removeSpecialCharacters(parseAdkResponse(response).slice(0, 50)),
+			max_length: 10,
+		});
+		if (!session_name) {
+			session_name = 'Untitled'
+		}
+
+		await db.insert(sessions).values({
+			id: sessionId,
+			title: session_name,
+			userId
 		});
 
 		return response;
-	};
 
-	public static readonly deleteSession = async ({ ctx, userId, sessionId }: { ctx: Context; userId: number; sessionId: string }) => {
+	}
+
+	public static readonly deleteSession = async ({ ctx, db, userId, sessionId }: { ctx: Context; db: DbType; userId: number; sessionId: string }) => {
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
 
 		const existingSession = await adk.getSession({ userId, sessionId });
@@ -111,6 +131,8 @@ export class UntangleADKService {
 		if (!result) {
 			throw new Error('failed to delete session');
 		}
+
+		await db.delete(sessions).where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)));
 		return result;
 	};
 }
