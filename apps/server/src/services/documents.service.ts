@@ -1,7 +1,7 @@
 import { documents } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import type { DbType } from '@/types/user';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 export class DocumentsService {
@@ -9,7 +9,6 @@ export class DocumentsService {
 		body,
 		ctx,
 		fileName,
-		sessionId,
 		type,
 		userId,
 		db,
@@ -18,7 +17,6 @@ export class DocumentsService {
 		fileName: string;
 		body: ArrayBuffer;
 		userId: number;
-		sessionId: string;
 		type: 'image' | 'pdf' | 'other';
 		db: DbType;
 	}) => {
@@ -43,7 +41,6 @@ export class DocumentsService {
 				userId: userId,
 				title: fileName,
 				type: type,
-				sessionId: Number(sessionId),
 				r2_key: keyId,
 			})
 			.returning();
@@ -115,7 +112,7 @@ export class DocumentsService {
 		const documentsList = await db
 			.select()
 			.from(documents)
-			.where(eq(documents.sessionId, Number(sessionId)) && eq(documents.userId, userId))
+			.where(and(eq(documents.sessionId, sessionId), eq(documents.userId, userId)))
 			.limit(pageSize)
 			.offset(offset);
 

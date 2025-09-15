@@ -26,6 +26,9 @@ importers:
       '@libsql/client':
         specifier: ^0.15.15
         version: 0.15.15
+      axios:
+        specifier: ^1.12.1
+        version: 1.12.1
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
