@@ -140,8 +140,36 @@ body {
 .input-wrapper {
   flex-grow: 1;
   position: relative;
+  padding: 20px 24px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  position: sticky;
+  bottom: 0;
+}
+
+/* Input wrapper to contain input and screenshot button */
+.input-wrapper {
+  flex-grow: 1;
+  position: relative;
   display: flex;
   align-items: center;
+}
+
+/* Style for the text input field */
+.chat-input {
+  flex-grow: 1;
+  padding: 16px 50px 16px 20px; /* Right padding for screenshot button */
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  color: #e2e8f0;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  height: 52px;
 }
 
 /* Style for the text input field */
@@ -167,8 +195,28 @@ body {
 
 .chat-input::placeholder {
   color: #64748b;
+.chat-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.chat-input::placeholder {
+  color: #64748b;
+}
+
+/* Screenshot button inside input */
+.screenshot-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  color: #60a5fa;
+  cursor: pointer;
 /* Screenshot button inside input */
 .screenshot-btn {
   position: absolute;
@@ -251,7 +299,78 @@ body {
 .chat-send-btn {
   width: 52px;
   height: 52px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.screenshot-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.screenshot-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Better screenshot icon using CSS */
+.screenshot-icon {
+  width: 16px;
+  height: 16px;
+  position: relative;
+}
+
+.screenshot-icon::before {
+  content: '📷';
+  font-size: 16px;
+  display: block;
+}
+
+/* Alternative CSS-only camera icon */
+.screenshot-icon-alt {
+  width: 16px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  position: relative;
+}
+
+.screenshot-icon-alt::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 2px 2px 0 0;
+}
+
+.screenshot-icon-alt::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+/* Style for the send button */
+.chat-send-btn {
+  width: 52px;
+  height: 52px;
   border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
   border-radius: 16px;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   color: white;
@@ -263,13 +382,25 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
 .chat-send-btn:hover {
+.chat-send-btn:hover {
   transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
   box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
 }
 
+.chat-send-btn:active {
+  transform: translateY(0);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.4;
 .chat-send-btn:active {
   transform: translateY(0);
 }
@@ -281,9 +412,11 @@ body {
 }
 
 /* Add some cool animations */
+/* Add some cool animations */
 @keyframes slideIn {
   from {
     opacity: 0;
+    transform: translateY(20px);
     transform: translateY(20px);
   }
   to {
@@ -377,11 +510,120 @@ body {
 }
 
 .screenshot-container p {
+/* Loading animation - pure dots without text */
+.loading-message {
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+  border-left: 3px solid #3b82f6;
+  position: relative;
+  max-width: 80px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.loading-message::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+}
+
+.loading-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-dots .dot {
+  width: 8px;
+  height: 8px;
+  background: #60a5fa;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots .dot:nth-child(1) { 
+  animation-delay: -0.32s; 
+}
+
+.loading-dots .dot:nth-child(2) { 
+  animation-delay: -0.16s; 
+}
+
+.loading-dots .dot:nth-child(3) { 
+  animation-delay: 0s; 
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  } 
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Screenshot display styles */
+.screenshot-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.screenshot-image {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.screenshot-container p {
   margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
   font-size: 14px;
   opacity: 0.8;
 }
 
+/* Add a subtle pulse animation for AI messages */
+.demistify-message:first-child {
+  animation: slideIn 0.3s ease-out, pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+  100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .chat-messages {
+    padding: 16px;
+    gap: 12px;
 /* Add a subtle pulse animation for AI messages */
 .demistify-message:first-child {
   animation: slideIn 0.3s ease-out, pulse 2s infinite;
@@ -409,13 +651,42 @@ body {
   .chat-message {
     max-width: 90%;
     padding: 12px 16px;
+  .chat-message {
+    max-width: 90%;
+    padding: 12px 16px;
   }
   
   .chat-input-row {
+  .chat-input-row {
     padding: 16px;
+    gap: 8px;
     gap: 8px;
   }
   
+  .chat-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 16px;
+  }
+  
+  .chat-send-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+}
+
+/* Add a subtle glow effect to the entire panel */
+.chat-panel::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
   .chat-input {
     font-size: 16px; /* Prevents zoom on iOS */
     padding: 12px 16px;
