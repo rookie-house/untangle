@@ -12,6 +12,7 @@ export interface Env {
 	GOOGLE_CLIENT_SECRET: string;
 	GOOGLE_REDIRECT_URI: string;
 	BUCKET: R2Bucket;
+	AI: Ai;
 }
 
 export interface Val {
