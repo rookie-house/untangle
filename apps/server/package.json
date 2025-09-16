@@ -5,7 +5,7 @@
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
-		"dev": "wrangler dev",
+		"dev": "wrangler dev --remote",
 		"build": "tsc -p .",
 		"deploy": "wrangler deploy --minify",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
@@ -24,13 +24,13 @@
 		"drizzle-orm": "^0.44.5",
 		"googleapis": "^159.0.0",
 		"hono": "^4.9.7",
-		"wrangler": "^4.36.0",
 		"zod": "^4.1.8"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250913.0",
 		"@types/node": "^24.3.2",
 		"drizzle-kit": "^0.31.4",
-		"tsx": "^4.20.5"
+		"tsx": "^4.20.5",
+		"wrangler": "^4.36.0"
 	}
 }
