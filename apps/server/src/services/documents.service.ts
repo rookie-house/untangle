@@ -23,7 +23,6 @@ export class DocumentsService {
 		const keyId = crypto.randomUUID();
 
 		const r2 = R2.getInstance(ctx.env.BUCKET, ctx.env.BASE_URL);
-		console.log('r2:', ctx.env.BUCKET, ctx.env.BASE_URL);
 
 		const mimeType = type === 'image' ? 'image/png' : type === 'pdf' ? 'application/pdf' : 'application/octet-stream';
 		const uploadResult = await r2.upload(keyId, body, { httpMetadata: { contentType: mimeType } });
@@ -76,12 +75,10 @@ export class DocumentsService {
 	};
 
 	public static readonly getDocumentById = async ({
-		ctx,
 		documentId,
 		db,
 		userId,
 	}: {
-		ctx: Context;
 		documentId: number;
 		userId: number;
 		db: DbType;

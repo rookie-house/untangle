@@ -18,9 +18,16 @@ export class R2 {
 
 		if (data instanceof File) {
 			body = data.stream();
+			const existingContentType = options?.httpMetadata instanceof Headers 
+				? options.httpMetadata.get('content-type')
+				: options?.httpMetadata?.contentType;
+			
 			options = {
 				...options,
-				httpMetadata: { contentType: data.type },
+				httpMetadata: {
+					...options?.httpMetadata,
+					contentType: existingContentType ?? data.type,
+				},
 			};
 		} else {
 			body = data;
