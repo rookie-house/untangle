@@ -25,9 +25,8 @@ export class UntangleADK {
 			headers: {
 				'Content-Type': 'application/json',
 				Accept: 'application/json',
-
 			},
-			withCredentials: true
+			withCredentials: true,
 		});
 	}
 
@@ -60,7 +59,9 @@ export class UntangleADK {
 	public async listSessions(params: IListSessionsParams): Promise<IResponseListSessions> {
 		const { userId } = params;
 		const { data } = await this.axiosInstance.get(`/apps/${this._app_name}/users/${userId.toString()}/sessions`);
-		return data;
+		return {
+			sessions: data,
+		};
 	}
 
 	public async runAgent(params: IRunAgentParams): Promise<IResponseRunAgent> {
@@ -68,15 +69,15 @@ export class UntangleADK {
 		const parts =
 			rawFiles && rawFiles.length > 0
 				? [
-					...rawFiles.map((file) => ({
-						fileData: {
-							displayName: file.displayName,
-							fileUri: file.fileUri,
-							mimeType: file.mimeType,
-						},
-					})),
-					{ text: message },
-				]
+						...rawFiles.map((file) => ({
+							fileData: {
+								displayName: file.displayName,
+								fileUri: file.fileUri,
+								mimeType: file.mimeType,
+							},
+						})),
+						{ text: message },
+					]
 				: [{ text: message }];
 
 		try {
@@ -96,7 +97,6 @@ export class UntangleADK {
 			console.error('Error in UntangleADK.runAgent:', error);
 			throw new Error(`Failed to run agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
-
 	}
 
 	public async deleteSession(params: IDeleteSessionParams): Promise<null> {

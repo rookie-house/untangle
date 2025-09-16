@@ -32,7 +32,6 @@ export class UntangleADKService {
 		return session;
 	};
 
-
 	public static readonly start = async ({
 		ctx,
 		db,
@@ -60,7 +59,6 @@ export class UntangleADKService {
 			if (!session) {
 				throw new Error('Failed to create new session');
 			}
-
 		} else {
 			const sessionExists = await adk.getSession({ userId, sessionId });
 			if (!sessionExists) {
@@ -95,7 +93,7 @@ export class UntangleADKService {
 			sessionId,
 			message,
 			rawFiles: Array.isArray(files) ? files : [],
-			streaming: false
+			streaming: false,
 		});
 
 		let session_name = await WorkerAI.run({
@@ -110,14 +108,23 @@ export class UntangleADKService {
 		await db.insert(sessions).values({
 			id: sessionId,
 			title: session_name,
-			userId
+			userId,
 		});
 
 		return response;
+	};
 
-	}
-
-	public static readonly deleteSession = async ({ ctx, db, userId, sessionId }: { ctx: Context; db: DbType; userId: number; sessionId: string }) => {
+	public static readonly deleteSession = async ({
+		ctx,
+		db,
+		userId,
+		sessionId,
+	}: {
+		ctx: Context;
+		db: DbType;
+		userId: number;
+		sessionId: string;
+	}) => {
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
 
 		const existingSession = await adk.getSession({ userId, sessionId });

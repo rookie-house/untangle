@@ -13,7 +13,7 @@ export class UntangleADKController {
 				return ctx.json(api_response({ message: 'Unauthorized', is_error: true }), 401);
 			}
 
-			const { sessions } = await UntangleADKService.getSessions({ ctx, userId: user.id });
+			const sessions = await UntangleADKService.getSessions({ ctx, userId: user.id });
 
 			return ctx.json(api_response({ data: sessions, message: 'Sessions fetched successfully' }));
 		} catch (error) {
@@ -61,6 +61,7 @@ export class UntangleADKController {
 				db,
 				userId: user.id,
 				message: body.message,
+				sessionId: body.sessionId,
 				rawFiles:
 					body.img?.map((item) => ({
 						id: item.id,
