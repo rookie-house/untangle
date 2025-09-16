@@ -96,9 +96,6 @@ chrome.runtime.onMessage.addListener(async (message, sender) => {
       }
       break;
 
-    case "chatRequest":
-      break;
-
     case "openSidePanelRequest":
       if (sender.tab && sender.tab.id) {
         try {
