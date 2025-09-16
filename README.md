@@ -153,4 +153,4 @@ We welcome contributions from developers, legal professionals, and designers!
 
 ## 📜 License
 
-MIT License.
+[MIT License.](LICENSE.md)
