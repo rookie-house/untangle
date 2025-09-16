@@ -20,7 +20,36 @@ body {
   position: relative;
 }
 
-/* Container for all chat messages */
+/* Auth Panel Styles */
+.auth-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.22);
+  min-height: 320px;
+}
+
+.auth-title {
+  color: #f9fafb;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.auth-panel p {
+  color: #cbd5e1;
+  font-size: 16px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
 .chat-messages {
   flex-grow: 1;
   overflow-y: auto;
@@ -31,7 +60,6 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
 .chat-messages::-webkit-scrollbar {
   width: 6px;
 }
