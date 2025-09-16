@@ -1,135 +1,156 @@
-# Turborepo starter
+# Untangle 🪢
 
-This Turborepo starter is maintained by the Turborepo core team.
+**Demystifying Legal Documents for Everyone**
 
-## Using this example
+Legal documents are long, complex, and filled with jargon—making them hard to read, easy to ignore, and risky to sign. **Untangle** is an intelligent solution that simplifies legal text into clear, accessible language, highlights hidden risks, and empowers people to make informed decisions—without always needing a lawyer.
 
-Run the following command:
+---
+![untangle-architecture](https://github.com/user-attachments/assets/44bada45-2154-4d76-b655-8e0a35587c00)
+
+
+## 🚀 Features
+
+* **Zero-friction access**: Works instantly with overlays, quick toggles, and chat—no tedious uploads or portals.
+* **WhatsApp integration**: Get clarity right where you already spend your time.
+* **Cross-platform presence**: Mobile overlay, Web dashboard, Chrome Extension, and WhatsApp.
+* **Centralised insights**: Keep track of past documents, risks, and summaries instead of one-time outputs.
+* **Made for everyone**: Simple language, friendly UX, confidence for all users—students, small businesses, and everyday citizens.
+
+---
+
+## 🏗️ Architecture
+
+Untangle is a **Turborepo monorepo** containing multiple apps and packages:
+
+### **Apps**
+
+* **`apps/web`** → Next.js web dashboard for users.
+* **`apps/server`** → Hono + Drizzle backend API (Cloudflare Workers + Turso DB).
+* **`browser-extension`** → Chrome extension for on-page legal text analysis.
+
+### **ADK (Agent Development Kit)**
+
+* **`adk/untangle_agent`** → Core AI coordinator + specialized sub-agents:
+
+  * **Demistifier Agent** → Summarises and explains legal documents.
+  * **Risk Evaluator + Extractor** → Identifies risky clauses and phrases.
+  * **Conversation Agent** → Chat with your stored documents and insights.
+
+### **Shared Packages**
+
+* **`packages/ui`** → Shared React UI components.
+* **`packages/eslint-config`** → Shared linting rules.
+* **`packages/typescript-config`** → Shared TS configs.
+
+---
+
+## 📂 Directory Structure
+
+```
+rookie-house-untangle/
+ ├── adk/                   # AI agent pipelines
+ ├── apps/                  # Web, server, extension
+ ├── packages/              # Shared configs & UI
+ ├── .github/workflows/     # CI/CD
+ ├── turbo.json             # Turborepo config
+ ├── pnpm-workspace.yaml    # Monorepo workspace
+ └── package.json
+```
+
+---
+
+## ⚡ Getting Started
+
+### Prerequisites
+
+* Node.js **>=18**
+* pnpm **>=9**
+* Python **>=3.13** (for ADK)
+* Turso database & Cloudflare Workers account
+
+### Install dependencies
 
 ```sh
-npx create-turbo@latest
+pnpm install
 ```
 
-## What's inside?
+### Run development servers
 
-This Turborepo includes the following packages/apps:
+```sh
+# Start everything
+pnpm dev
 
-### Apps and Packages
+# Start only web
+pnpm turbo dev --filter=web
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+# Start only server
+pnpm turbo dev --filter=server
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### Build all apps
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```sh
+pnpm build
 ```
 
-### Develop
+---
 
-To develop all apps and packages, run the following command:
+## 🔑 Environment Variables
 
-```
-cd my-turborepo
+Create `.env` or `.dev.vars` files in **apps/server/** with:
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```env
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
+JWT_SECRET=
+SALT=
+FRONTEND_URL=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=
+UNTANGLE_ADK_API=
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## 📦 Deployment
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+* **Frontend (web)** → Vercel
+* **Backend (server)** → Cloudflare Workers
+* **Database** → Turso (libSQL)
+* **AI Agents** → Google ADK + Gemini models
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+---
 
-```
-cd my-turborepo
+## 💡 Why Untangle?
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+* Makes legal documents **simple, not scary**.
+* Highlights **risks hidden in fine print**.
+* Works **where you already are** (WhatsApp, browser, mobile).
+* Provides **ongoing insights**, not just one-off summaries.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+---
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## 🛠️ Tech Stack
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+* **Frontend**: Next.js, Tailwind, Shadcn UI
+* **Backend**: Hono, Drizzle ORM, Cloudflare Workers
+* **Database**: Turso (libSQL)
+* **Agents**: Google ADK, Gemini 2.x models
+* **Extension**: Chrome + Vite + React
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+---
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+## 👥 Contributing
 
-## Useful Links
+We welcome contributions from developers, legal professionals, and designers!
 
-Learn more about the power of Turborepo:
+* Fork the repo
+* Create a feature branch
+* Open a PR 🎉
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+---
+
+## 📜 License
+
+MIT License.
