@@ -1,66 +1,81 @@
-import { useState } from 'react';
-import { Sparkles, Camera, Zap } from 'lucide-react';
-import './App.css';
-import WebScraper, { type ScrapeResult } from '@/lib/webScraper';
-import { HighlightConfig, highlightLinks, removeHighlights } from '@/lib/highLight';
+import { useState, useEffect } from "react";
+import { Sparkles, Camera, Zap } from "lucide-react";
+import "./App.css";
 
 export default function App() {
   const [screenshotCaptured, setScreenshotCaptured] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [scrapedData, setScrapedData] = useState<ScrapeResult | null>(null);
-  const [isHighlighted, setIsHighlighted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<{ userId: string; userName: string } | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await chrome.runtime.sendMessage({ action: "checkAuthStatus" });
+    };
+    checkAuth();
+
+    const listener = (message: any) => {
+      if (message.action === "authStatusResponse") {
+        setIsAuthenticated(message.payload.isAuthenticated);
+        setUser(message.payload.user || null);
+        setIsLoading(false);
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
 
   const handleDemystify = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Starting demystify process...');
-      const result = await WebScraper();
-      setScrapedData(result);
-      
-      // Highlight links after scraping
-      const highlightConfig: HighlightConfig = {
-        externalLinks: result.externalLinks,
-        internalLinks: result.internalLinks
-      };
-      
-      await highlightLinks(highlightConfig);
-      setIsHighlighted(true);
-      
-      console.log('Scraped Data:', result);
-    } catch (error) {
-      console.error('Detailed error:', error);
-      if (error instanceof Error) {
-        alert(`Error: ${error.message}\nCheck console for details.`);
-      } else {
-        alert('An unknown error occurred.\n Check console for details.');
+    if (isAuthenticated) {
+      try {
+        const [activeTab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        if (activeTab && activeTab.id) {
+          await chrome.sidePanel.open({ tabId: activeTab.id });
+        }
+      } catch (error) {
+        console.error("Error opening side panel:", error);
+        alert("Could not open side panel. Are you on a valid webpage?");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleToggleHighlight = async () => {
-    try {
-      if (isHighlighted) {
-        await removeHighlights();
-        setIsHighlighted(false);
-      } else if (scrapedData) {
-        const highlightConfig: HighlightConfig = {
-          externalLinks: scrapedData.externalLinks,
-          internalLinks: scrapedData.internalLinks
-        };
-        await highlightLinks(highlightConfig);
-        setIsHighlighted(true);
-      }
-    } catch (error) {
-      console.error('Error toggling highlights:', error);
-    }
+  const handleLogin = () => {
+    const loginUrl = "https://untangle.rookie.house/";
+    chrome.tabs.create({ url: loginUrl });
   };
 
   const handleScreenshot = () => {
     setScreenshotCaptured(true);
     setTimeout(() => setScreenshotCaptured(false), 3000);
   };
+
+  if (isLoading) {
+    return (
+      <div className="popup-container">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="popup-container auth-container">
+        <h2 className="auth-title">Please Log In</h2>
+        <p>Access your user data and features.</p>
+        <button onClick={handleLogin} className="action-btn primary-btn">
+          <span>Log In</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="popup-container">
@@ -71,39 +86,20 @@ export default function App() {
           </div>
           <div className="company-info">
             <h1 className="company-name">Your Company</h1>
-            <p className="tagline">Smart Web Assistant</p>
+            <p className="tagline">Welcome, {user?.userName}!</p>
           </div>
         </div>
       </header>
 
-      {/* Main Actions */}
       <div className="actions-container">
-        <button
-          onClick={handleDemystify}
-          disabled={isLoading}
-          className="action-btn primary-btn"
-        >
+        <button onClick={handleDemystify} className="action-btn primary-btn">
           <Sparkles size={18} />
-          <span>{isLoading ? 'Processing...' : 'Demystify'}</span>
+          <span>Demystify</span>
         </button>
-
-        <button
-          onClick={handleScreenshot}
-          className="action-btn secondary-btn"
-        >
+        <button onClick={handleScreenshot} className="action-btn secondary-btn">
           <Camera size={18} />
           <span>Screenshot</span>
         </button>
-
-        {scrapedData && (
-          <button
-            onClick={handleToggleHighlight}
-            className="action-btn secondary-btn"
-          >
-            <Zap size={18} />
-            <span>{isHighlighted ? 'Remove Highlights' : 'Highlight Links'}</span>
-          </button>
-        )}
       </div>
 
       {screenshotCaptured && (
@@ -111,26 +107,6 @@ export default function App() {
           ✓ Screenshot captured successfully!
         </div>
       )}
-
-      {isHighlighted && (
-        <div className="status-message success">
-          ✓ Links highlighted on page!
-        </div>
-      )}
-
-      {/* Display scraped data */}
-      {scrapedData && (
-        <div className="status-message">
-          <strong>Scraped:</strong> {scrapedData.title} 
-          <br />
-          <small>
-            Links: <span style={{color: '#ff6b6b'}}>●</span> {scrapedData.externalLinks.length} external, 
-            <span style={{color: '#4ecdc4'}}>●</span> {scrapedData.internalLinks.length} internal
-          </small>
-        </div>
-      )}
-
-     
     </div>
   );
 }

@@ -41,7 +41,7 @@ export class AuthController {
 	};
 	public static readonly google = async (ctx: Context) => {
 		try {
-			const url = await AuthService.googleAuthUrl({ ctx });
+			const { url } = await AuthService.googleAuthUrl({ ctx });
 			return ctx.json({ url });
 		} catch (error) {
 			return ctx.json(

@@ -66,7 +66,8 @@ export function useAuth() {
     try {
       const res = await api.auth.googleSignIn();
       if (res.data?.url) {
-        window.location.href = res.data.url.url;
+        // console.log(res.data.url)
+        window.location.href = res.data.url;
       }
     } catch (err: unknown) {
       const errorMessage = extractErrorMessage(err, "Google sign-in failed");

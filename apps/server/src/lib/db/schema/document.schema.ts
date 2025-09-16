@@ -15,8 +15,8 @@ export const documents = sqliteTable(
 			.notNull(),
 		r2_key: text().notNull(),
 		url: text().notNull(),
-		userId: int().notNull(),
-		sessionId: text(),
+		userId: int().notNull().references(() => users.id),
+		sessionId: text().references(() => sessions.id),
 		updatedAt: int({ mode: 'timestamp' })
 			.notNull()
 			.$defaultFn(() => new Date())
@@ -34,10 +34,6 @@ export const documents = sqliteTable(
 	],
 );
 
-export const documentRelations = relations(documents, ({ one }) => ({
-	user: one(users),
-	session: one(sessions),
-}));
 
 export type IDocument = typeof documents.$inferSelect;
 export type IPartialDocument = Partial<typeof documents.$inferInsert>;

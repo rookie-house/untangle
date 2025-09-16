@@ -14,7 +14,7 @@ import type {
 export class UntangleADK {
 	private static instance: UntangleADK;
 	private axiosInstance: AxiosInstance;
-	private _app_name = 'untangle_agent';
+	private _app_name = 'untangle-adk';
 	private constructor(
 		private config: {
 			api: string;
@@ -26,6 +26,7 @@ export class UntangleADK {
 				'Content-Type': 'application/json',
 				Accept: 'application/json',
 			},
+			withCredentials: true,
 		});
 	}
 
@@ -58,7 +59,9 @@ export class UntangleADK {
 	public async listSessions(params: IListSessionsParams): Promise<IResponseListSessions> {
 		const { userId } = params;
 		const { data } = await this.axiosInstance.get(`/apps/${this._app_name}/users/${userId.toString()}/sessions`);
-		return data;
+		return {
+			sessions: data,
+		};
 	}
 
 	public async runAgent(params: IRunAgentParams): Promise<IResponseRunAgent> {
@@ -76,18 +79,24 @@ export class UntangleADK {
 						{ text: message },
 					]
 				: [{ text: message }];
-		const { data } = await this.axiosInstance.post('/run', {
-			appName: this._app_name,
-			userId: userId.toString(),
-			sessionId: sessionId,
-			newMessage: {
-				parts: parts,
-				role: role || 'user',
-			},
-			streaming: streaming || false,
-			stateDelta: stateDelta || {},
-		});
-		return data;
+
+		try {
+			const { data } = await this.axiosInstance.post('/run', {
+				appName: this._app_name,
+				userId: userId.toString(),
+				sessionId: sessionId,
+				newMessage: {
+					parts: parts,
+					role: role || 'user',
+				},
+				streaming: streaming || false,
+				stateDelta: stateDelta || {},
+			});
+			return data;
+		} catch (error) {
+			console.error('Error in UntangleADK.runAgent:', error);
+			throw new Error(`Failed to run agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
 	}
 
 	public async deleteSession(params: IDeleteSessionParams): Promise<null> {
