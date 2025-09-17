@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import { index, int, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable(

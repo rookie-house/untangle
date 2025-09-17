@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import { index, int, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { users } from './user.schema';
 import { sessions } from './session.schema';
@@ -6,17 +5,18 @@ import { sessions } from './session.schema';
 export const documents = sqliteTable(
 	'documents',
 	{
-		id: int().notNull().primaryKey({ autoIncrement: true }),
+		id: text().notNull().unique().primaryKey(),
 		title: text().notNull(),
 		type: text('type', {
 			enum: ['image', 'pdf', 'other'],
 		})
 			.$type<'image' | 'pdf' | 'other'>()
 			.notNull(),
-		r2_key: text().notNull(),
 		url: text().notNull(),
-		userId: int().notNull().references(() => users.id),
-		sessionId: text().references(() => sessions.id),
+		userId: int()
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+		sessionId: text().references(() => sessions.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
 		updatedAt: int({ mode: 'timestamp' })
 			.notNull()
 			.$defaultFn(() => new Date())
@@ -33,7 +33,6 @@ export const documents = sqliteTable(
 		index('documents_title_idx').on(t.title),
 	],
 );
-
 
 export type IDocument = typeof documents.$inferSelect;
 export type IPartialDocument = Partial<typeof documents.$inferInsert>;

@@ -29,6 +29,15 @@ export class UntangleADKService {
 		if (!session) {
 			throw new Error('failed to create session');
 		}
+
+		const db = ctx.get('db').instance as DbType;
+
+		if (!db) {
+			throw new Error('Database not found');
+		}
+
+		await db.insert(sessions).values({ id: sessionId, title: 'New Session', userId });
+
 		return session;
 	};
 
@@ -46,7 +55,7 @@ export class UntangleADKService {
 		message: string;
 		sessionId?: string;
 		rawFiles?: {
-			id: string;
+			key: string;
 			displayName: string;
 			fileUri: string;
 			mimeType: string;
@@ -69,15 +78,18 @@ export class UntangleADKService {
 			}
 		}
 
+		await db.insert(sessions).values({ id: sessionId, title: 'New Session', userId }).onConflictDoNothing();
+
 		let files: IFiles[] = [];
 
 		if (rawFiles && rawFiles.length > 0) {
-			const documentUpdates = rawFiles.map((file) =>
-				db
+			const documentUpdates = rawFiles.map((file) => {
+				console.log('Raw files to be processed:', file);
+				return db
 					.update(documents)
 					.set({ sessionId })
-					.where(and(eq(documents.r2_key, file.id), eq(documents.userId, userId))),
-			);
+					.where(and(eq(documents.id, file.key), eq(documents.userId, userId)));
+			});
 
 			await Promise.all(documentUpdates);
 
@@ -88,30 +100,36 @@ export class UntangleADKService {
 			}));
 		}
 
-		const response = await adk.runAgent({
-			userId,
-			sessionId,
-			message,
-			rawFiles: Array.isArray(files) ? files : [],
-			streaming: false,
-		});
+		try {
+			const response = await adk.runAgent({
+				userId,
+				sessionId,
+				message,
+				rawFiles: Array.isArray(files) ? files : [],
+				streaming: false,
+			});
 
-		let session_name = await WorkerAI.run({
-			ctx,
-			input_text: removeSpecialCharacters(parseAdkResponse(response).slice(0, 50)),
-			max_length: 10,
-		});
-		if (!session_name) {
-			session_name = 'Untitled';
+			let session_name = await WorkerAI.run({
+				ctx,
+				input_text: removeSpecialCharacters(parseAdkResponse(response).slice(0, 50)),
+				max_length: 10,
+			});
+
+			if (!session_name) {
+				session_name = 'Untitled';
+			}
+
+			await db
+				.update(sessions)
+				.set({ title: session_name })
+				.where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)))
+				.execute();
+
+			return response;
+		} catch (error) {
+			console.error('Error in UntangleADKService.start:', error);
+			throw new Error(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
-
-		await db.insert(sessions).values({
-			id: sessionId,
-			title: session_name,
-			userId,
-		});
-
-		return response;
 	};
 
 	public static readonly deleteSession = async ({

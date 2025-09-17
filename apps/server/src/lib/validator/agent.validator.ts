@@ -7,7 +7,7 @@ const firstSchema = z.object({
 	img: z
 		.array(
 			z.object({
-				id: z.string(),
+				key: z.string(),
 				title: z.string(),
 				url: z.string().url(),
 				type: z.enum(['pdf', 'image', 'other']),

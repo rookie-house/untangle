@@ -39,11 +39,11 @@ export class DocumentsService {
 		const document = await db
 			.insert(documents)
 			.values({
+				id: keyId,
 				url: url,
 				userId: userId,
 				title: fileName,
 				type: type,
-				r2_key: keyId,
 			})
 			.returning();
 
@@ -74,15 +74,7 @@ export class DocumentsService {
 		return { documents: documentsList };
 	};
 
-	public static readonly getDocumentById = async ({
-		documentId,
-		db,
-		userId,
-	}: {
-		documentId: number;
-		userId: number;
-		db: DbType;
-	}) => {
+	public static readonly getDocumentById = async ({ documentId, db, userId }: { documentId: string; userId: number; db: DbType }) => {
 		const document = await db
 			.select()
 			.from(documents)

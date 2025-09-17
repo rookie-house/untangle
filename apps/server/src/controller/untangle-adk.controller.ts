@@ -64,14 +64,14 @@ export class UntangleADKController {
 				sessionId: body.sessionId,
 				rawFiles:
 					body.img?.map((item) => ({
-						id: item.id,
+						key: item.key,
 						displayName: item.title,
 						fileUri: item.url,
 						mimeType: item.type === 'image' ? 'image/*' : item.type === 'pdf' ? 'application/pdf' : 'application/octet-stream',
 					})) || [],
 			});
 
-			return ctx.json(api_response({ data: messageResponse, message: 'First chat message sent successfully' }));
+			return ctx.json(api_response({ data: messageResponse, message: 'chat fetched successfully' }));
 		} catch (error) {
 			if (error instanceof Error) {
 				return ctx.json(api_response({ message: error.message, is_error: true }), 500);
