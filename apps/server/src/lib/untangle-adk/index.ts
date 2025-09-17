@@ -89,7 +89,7 @@ export class UntangleADK {
 					parts: parts,
 					role: role || 'user',
 				},
-				streaming: true,
+				streaming: streaming || false,
 				stateDelta: stateDelta || {},
 			});
 			if (!data) {

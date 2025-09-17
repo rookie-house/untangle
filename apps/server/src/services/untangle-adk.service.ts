@@ -123,7 +123,6 @@ export class UntangleADKService {
 				.update(sessions)
 				.set({ title: session_name })
 				.where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)))
-				.execute();
 
 			return response;
 		} catch (error) {
