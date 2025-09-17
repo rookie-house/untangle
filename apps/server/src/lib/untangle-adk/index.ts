@@ -69,6 +69,7 @@ export class UntangleADK {
 		const parts =
 			rawFiles && rawFiles.length > 0
 				? [
+						{ text: message },
 						...rawFiles.map((file) => ({
 							fileData: {
 								displayName: file.displayName,
@@ -76,7 +77,6 @@ export class UntangleADK {
 								mimeType: file.mimeType,
 							},
 						})),
-						{ text: message },
 					]
 				: [{ text: message }];
 
@@ -92,6 +92,9 @@ export class UntangleADK {
 				streaming: streaming || false,
 				stateDelta: stateDelta || {},
 			});
+			if (!data) {
+				throw new Error('No response data from UntangleADK');
+			}
 			return data;
 		} catch (error) {
 			console.error('Error in UntangleADK.runAgent:', error);

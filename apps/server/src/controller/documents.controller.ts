@@ -106,7 +106,7 @@ export class DocumentsController {
 				return ctx.json(api_response({ message: 'Document ID is required', is_error: true }), 400);
 			}
 
-			const document = await DocumentsService.getDocumentById({ documentId: Number(id), userId: user.id, db });
+			const document = await DocumentsService.getDocumentById({ documentId: id, userId: user.id, db });
 
 			return ctx.json(
 				api_response({

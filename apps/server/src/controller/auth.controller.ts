@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import type { AuthValidator } from '@/lib/validator/auth.validator';
 import { AuthService } from '@/services/auth.service';
 import { api_response } from '@/types/api-response';
+import type { IUserContext } from '@/types/user';
 
 export class AuthController {
 	public static readonly signup = async (ctx: Context) => {
@@ -9,7 +10,7 @@ export class AuthController {
 			// @ts-ignore
 			const { email, password }: AuthValidator = ctx.req.valid('json');
 			const user = await AuthService.signup({ ctx, email, password });
-			
+
 			return ctx.json(
 				api_response({
 					message: 'User created successfully',
@@ -21,7 +22,7 @@ export class AuthController {
 		} catch (error) {
 			return ctx.json(api_response({ message: error instanceof Error ? error.message : 'signup failed', is_error: true }), 400);
 		}
-	};		
+	};
 	public static readonly signin = async (ctx: Context) => {
 		try {
 			// @ts-ignore
@@ -72,6 +73,26 @@ export class AuthController {
 			return ctx.json(
 				api_response({
 					message: error instanceof Error ? error.message : 'google callback failed',
+					is_error: true,
+				}),
+				400,
+			);
+		}
+	};
+
+	public static readonly ping = async (ctx: Context) => {
+		try {
+			const user = ctx.get('user') as IUserContext;
+
+			if (!user) {
+				return ctx.json(api_response({ message: 'Unauthorized', is_error: true }), 401);
+			}
+
+			return ctx.json(api_response({ message: 'user fetched successfully', data: user, is_error: false }), 200);
+		} catch (error) {
+			return ctx.json(
+				api_response({
+					message: error instanceof Error ? error.message : 'fetching user failed',
 					is_error: true,
 				}),
 				400,
