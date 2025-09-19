@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "75570925752",
+    "project_id": "untangle-f4362",
+    "storage_bucket": "untangle-f4362.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75570925752:android:410cb53b11fc7ff121644d",
+        "android_client_info": {
+          "package_name": "com.untangle.app.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChr0r1RVJv5YbirOWKlwo7uf-ymuzJkwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
