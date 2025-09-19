@@ -6,9 +6,20 @@ import { initializeDatabase, validateEnvironment } from '@/lib/utils/helper';
 import { users } from '@/lib/db/schema';
 import type { IJwtUserPayload } from '@/types/jwt';
 import GoogleAuth from '@/lib/google';
+import { RedisClient } from '@/lib/redis';
 
 export class AuthService {
-	public static readonly signup = async ({ ctx, email, password }: { ctx: Context; email: string; password: string }) => {
+	public static readonly signup = async ({
+		ctx,
+		email,
+		password,
+		sessionId,
+	}: {
+		ctx: Context;
+		email: string;
+		password: string;
+		sessionId?: string;
+	}) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
@@ -45,10 +56,38 @@ export class AuthService {
 			user: { id: newUser.id },
 		});
 
+		if (sessionId) {
+			const redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			const session = await redis.getSession({ sessionId });
+			if (!session || !session.phoneNumber) {
+				throw new Error('Session not found or phone number missing');
+			}
+			if (await redis.getUser({ phoneNumber: session.phoneNumber })) {
+				await redis.updateUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
+			} else {
+				await redis.setUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
+			}
+			await db.update(users).set({ phoneNumber: session.phoneNumber }).where(eq(users.id, newUser.id)).run();
+			await redis.deleteSession({ sessionId });
+		}
+
 		return { token, user: { id: newUser.id, email: newUser.email, name: newUser.name, profilePic: newUser.profilePic } };
 	};
 
-	public static readonly signin = async ({ ctx, email, password }: { ctx: Context; email: string; password: string }) => {
+	public static readonly signin = async ({
+		ctx,
+		email,
+		password,
+		sessionId,
+	}: {
+		ctx: Context;
+		email: string;
+		password: string;
+		sessionId?: string;
+	}) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
@@ -87,10 +126,28 @@ export class AuthService {
 			secret: ctx.env.JWT_SECRET,
 		});
 
+		if (sessionId) {
+			const redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			const session = await redis.getSession({ sessionId });
+			if (!session || !session.phoneNumber) {
+				throw new Error('Session not found or phone number missing');
+			}
+			if (await redis.getUser({ phoneNumber: session.phoneNumber })) {
+				await redis.updateUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
+			} else {
+				await redis.setUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
+			}
+			await db.update(users).set({ phoneNumber: session.phoneNumber }).where(eq(users.id, user.id)).run();
+			await redis.deleteSession({ sessionId });
+		}
+
 		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
 	};
 
-	public static readonly googleAuthUrl = async ({ ctx }: { ctx: Context }) => {
+	public static readonly googleAuthUrl = async ({ ctx, sessionId }: { ctx: Context; sessionId?: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
@@ -101,23 +158,32 @@ export class AuthService {
 			googleClientId: ctx.env.GOOGLE_CLIENT_ID || '',
 			googleClientSecret: ctx.env.GOOGLE_CLIENT_SECRET || '',
 			googleRedirectUri: ctx.env.GOOGLE_REDIRECT_URI || '',
-		}).getAuthUrl();
+		}).getAuthUrl(sessionId);
 
 		if (!googleAuthUrl) {
 			throw new Error('Failed to generate Google authentication URL.');
 		}
 
+		// Only create session in Redis if sessionId is provided
+		if (sessionId) {
+			const redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			await redis.setSession({ sessionId, phoneNumber: '', expiryInSeconds: 300 });
+		}
+
 		return { url: googleAuthUrl };
 	};
 
-	public static readonly googleCallback = async ({ ctx, code }: { ctx: Context; code: string }) => {
+	public static readonly googleCallback = async ({ ctx, code, sessionId }: { ctx: Context; code: string; sessionId?: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
 			throw new Error('Environment variables are not properly configured.');
 		}
 
-		const google = await GoogleAuth.getInstance({
+		const google = GoogleAuth.getInstance({
 			googleClientId: ctx.env.GOOGLE_CLIENT_ID || '',
 			googleClientSecret: ctx.env.GOOGLE_CLIENT_SECRET || '',
 			googleRedirectUri: ctx.env.GOOGLE_REDIRECT_URI || '',
@@ -141,17 +207,48 @@ export class AuthService {
 			throw new Error(dbError);
 		}
 
-		
+		// Extract sessionId from state parameter if it's prefixed with 'session:'
+		let finalSessionId = sessionId;
+		if (!finalSessionId) {
+			const state = ctx.req.query('state');
+			if (state && state.startsWith('session:')) {
+				finalSessionId = state.substring(8); // Remove 'session:' prefix
+			}
+		}
+		// Fallback to sessionId query parameter
+		if (!finalSessionId) {
+			finalSessionId = ctx.req.query('sessionId');
+		}
+
+		let phoneNumber;
+		if (finalSessionId) {
+			const redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			try {
+				const session = await redis.getSession({ sessionId: finalSessionId });
+				if (session && session.phoneNumber) {
+					phoneNumber = session.phoneNumber;
+					await redis.deleteSession({ sessionId: finalSessionId });
+				}
+			} catch (error) {
+				// Session might be expired or invalid, continue without phoneNumber
+				console.warn('Failed to retrieve session:', error);
+			}
+		}
 		const user = await db
 			.insert(users)
 			.values({
 				email: me.email,
 				google_access_token: tokens.access_token,
+				...(phoneNumber ? { phoneNumber } : {}),
 			})
 			.onConflictDoUpdate({
 				target: users.email,
 				set: {
 					google_access_token: tokens.access_token,
+					...(phoneNumber ? { phoneNumber } : {}),
 				},
 			})
 			.returning({
@@ -163,7 +260,6 @@ export class AuthService {
 			})
 			.get();
 
-
 		if (!user) {
 			throw new Error('Failed to create or update user.');
 		}
@@ -174,6 +270,52 @@ export class AuthService {
 		});
 
 		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
+	};
+
+	public static readonly getWhatsAppAuthLink = async ({ ctx, phoneNumber }: { ctx: Context; phoneNumber: string }) => {
+		const sessionId = crypto.randomUUID();
+
+		const validateEnv = validateEnvironment(ctx);
+
+		if (!validateEnv) {
+			throw new Error('Environment variables are not properly configured.');
+		}
+
+		await RedisClient.getInstance({
+			url: ctx.env.REDIS_URL,
+			token: ctx.env.REDIS_TOKEN,
+		}).setSession({
+			phoneNumber,
+			sessionId,
+			expiryInSeconds: 300,
+		});
+
+		return {
+			url: `${ctx.env.FRONTEND_URL}/whatsapp/auth?sessionId=${sessionId}&phoneNumber=${encodeURIComponent(phoneNumber)}`,
+		};
+	};
+
+	public static readonly verifyWhatsAppAuth = async ({ ctx, phoneNumber }: { ctx: Context; phoneNumber: string }) => {
+		const validateEnv = validateEnvironment(ctx);
+
+		if (!validateEnv) {
+			throw new Error('Environment variables are not properly configured.');
+		}
+
+		const redis = RedisClient.getInstance({
+			url: ctx.env.REDIS_URL,
+			token: ctx.env.REDIS_TOKEN,
+		});
+
+		const user = await redis.getUser({ phoneNumber });
+
+		if (!user) {
+			throw new Error('Invalid session or session expired');
+		}
+
+		return {
+			token: user.token,
+		};
 	};
 
 	private static async _hashPass({ password, salt }: { password: string; salt: string }): Promise<string> {

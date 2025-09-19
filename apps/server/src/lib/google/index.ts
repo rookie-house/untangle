@@ -35,12 +35,12 @@ class GoogleAuth {
 		return GoogleAuth.instance;
 	}
 
-	public getAuthUrl() {
+	public getAuthUrl(sessionId?: string) {
 		const authUrl = this._googleClient.generateAuthUrl({
 			access_type: 'offline',
 			scope: this._scopes,
 			include_granted_scopes: true,
-			state: crypto.randomBytes(32).toString('hex'),
+			state: sessionId ? `session:${sessionId}` : crypto.randomBytes(32).toString('hex'),
 		});
 		return authUrl;
 	}
