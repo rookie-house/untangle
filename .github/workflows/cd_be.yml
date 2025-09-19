@@ -1,0 +1,114 @@
+name: deploy be
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/server/**"
+      - ".github/workflows/cd_be.yml"
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.changes.outputs.server }}
+      migrations: ${{ steps.changes.outputs.migrations }}
+    steps:
+      - name: Checkout for changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch full history so git diff works reliably
+
+      - name: Check for changes
+        id: changes
+        run: |
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Check if server files changed
+          if echo "$CHANGED_FILES" | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
+            echo "server=true" >> $GITHUB_OUTPUT
+          else
+            echo "server=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check if migration files changed
+          if echo "$CHANGED_FILES" | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
+            echo "migrations=true" >> $GITHUB_OUTPUT
+          else
+            echo "migrations=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Debug outputs
+        run: |
+          echo "Server change detected: ${{ steps.changes.outputs.server }}"
+          echo "Migrations change detected: ${{ steps.changes.outputs.migrations }}"
+
+  deploy:
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate and run migrations
+        if: needs.changes.outputs.migrations == 'true'
+        run: |
+          echo "Migration files changed, running migrations..."
+          pnpm drizzle:generate
+          pnpm drizzle:migrate
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+
+      - name: Generate wrangler.jsonc
+        run: |
+          cat > wrangler.jsonc <<EOF
+          {
+            "name": "untangled-be",
+            "account_id": "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}",
+            "main": "src/index.ts",
+            "compatibility_date": "$(date +%Y-%m-%d)",
+            "compatibility_flags": ["nodejs_compat"],
+            "vars": {
+              "TURSO_DATABASE_URL": "${{ secrets.TURSO_DATABASE_URL }}",
+              "TURSO_AUTH_TOKEN": "${{ secrets.TURSO_AUTH_TOKEN }}",
+              "SALT": "${{ secrets.SALT }}",
+              "JWT_SECRET": "${{ secrets.BE_JWT_SECRET }}",
+              "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
+              "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
+              "GOOGLE_REDIRECT_URI": "${{ secrets.GOOGLE_REDIRECT_URI }}",
+              "FRONTEND_URL": "${{ vars.FRONTEND_URL }}",
+              "UNTANGLE_ADK_API": "${{ vars.UNTANGLE_ADK_API }}"
+            },
+            "r2_buckets": [
+              {
+                "binding": "${{ vars.BINDING}}",
+                "bucket_name": "${{ vars.BUCKET_NAME }}",
+              }
+            ]
+          }
+          EOF
+
+      - name: Deploy to Workers
+        run: pnpm wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
