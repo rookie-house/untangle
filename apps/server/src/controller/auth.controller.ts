@@ -62,7 +62,7 @@ export class AuthController {
 	public static readonly googleCallback = async (ctx: Context) => {
 		try {
 			const { code, state } = ctx.req.query();
-			if (!code || !state) {
+			if (!code) {
 				return ctx.json(
 					api_response({
 						message: 'Authorization code is missing',

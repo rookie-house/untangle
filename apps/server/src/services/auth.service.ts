@@ -175,7 +175,7 @@ export class AuthService {
 		return { url: googleAuthUrl };
 	};
 
-	public static readonly googleCallback = async ({ ctx, code, state }: { ctx: Context; code: string; state: string }) => {
+	public static readonly googleCallback = async ({ ctx, code, state }: { ctx: Context; code: string; state?: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
@@ -196,7 +196,7 @@ export class AuthService {
 
 		const me = await google.me(tokens.access_token);
 
-		if (!me || !me.email?.trim()) {
+		if (!me || !me.email) {
 			throw new Error('Failed to retrieve user info from Google.');
 		}
 
@@ -209,7 +209,7 @@ export class AuthService {
 		let phoneNumber: string | undefined;
 
 		// If state contains session info, extract phone number from Redis
-		if (state.startsWith('session:')) {
+		if (state && state.startsWith('session:')) {
 			const sessionId = state.split('session:')[1];
 
 			if (!sessionId) {
@@ -236,14 +236,14 @@ export class AuthService {
 				email: me.email,
 				name: me.name,
 				profilePic: me.profilePic,
-				phoneNumber: phoneNumber ?? '',
+				phoneNumber: phoneNumber ?? null,
 				google_access_token: tokens.access_token,
 			})
 			.onConflictDoUpdate({
 				target: users.email,
 				set: {
 					google_access_token: tokens.access_token,
-					phoneNumber: phoneNumber || users.phoneNumber,
+					phoneNumber: phoneNumber ?? users.phoneNumber,
 				},
 			})
 			.returning({
