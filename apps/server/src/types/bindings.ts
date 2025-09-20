@@ -13,6 +13,8 @@ export interface Env {
 	GOOGLE_REDIRECT_URI: string;
 	BUCKET: R2Bucket;
 	AI: Ai;
+	REDIS_URL: string;
+	REDIS_TOKEN: string;
 }
 
 export interface Val {
