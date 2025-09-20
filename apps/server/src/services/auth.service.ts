@@ -166,17 +166,16 @@ export class AuthService {
 
 		// Only create session in Redis if sessionId is provided
 		if (sessionId) {
-			const redis = RedisClient.getInstance({
+			await RedisClient.getInstance({
 				url: ctx.env.REDIS_URL,
 				token: ctx.env.REDIS_TOKEN,
-			});
-			await redis.setSession({ sessionId, phoneNumber: '', expiryInSeconds: 300 });
+			}).setSession({ sessionId, phoneNumber: '', expiryInSeconds: 300 });
 		}
 
 		return { url: googleAuthUrl };
 	};
 
-	public static readonly googleCallback = async ({ ctx, code, sessionId }: { ctx: Context; code: string; sessionId?: string }) => {
+	public static readonly googleCallback = async ({ ctx, code, state }: { ctx: Context; code: string; state: string }) => {
 		const validateEnv = validateEnvironment(ctx);
 
 		if (!validateEnv) {
@@ -197,7 +196,7 @@ export class AuthService {
 
 		const me = await google.me(tokens.access_token);
 
-		if (!me || !me.email) {
+		if (!me || !me.email?.trim()) {
 			throw new Error('Failed to retrieve user info from Google.');
 		}
 
@@ -207,55 +206,52 @@ export class AuthService {
 			throw new Error(dbError);
 		}
 
-		// Extract sessionId from state parameter if it's prefixed with 'session:'
-		let finalSessionId = sessionId;
-		if (!finalSessionId) {
-			const state = ctx.req.query('state');
-			if (state && state.startsWith('session:')) {
-				finalSessionId = state.substring(8); // Remove 'session:' prefix
-			}
-		}
-		// Fallback to sessionId query parameter
-		if (!finalSessionId) {
-			finalSessionId = ctx.req.query('sessionId');
-		}
+		let phoneNumber: string | undefined;
 
-		let phoneNumber;
-		if (finalSessionId) {
+		// If state contains session info, extract phone number from Redis
+		if (state.startsWith('session:')) {
+			const sessionId = state.split('session:')[1];
+
+			if (!sessionId) {
+				throw new Error('Session not found or phone number missing');
+			}
+
 			const redis = RedisClient.getInstance({
 				url: ctx.env.REDIS_URL,
 				token: ctx.env.REDIS_TOKEN,
 			});
-			try {
-				const session = await redis.getSession({ sessionId: finalSessionId });
-				if (session && session.phoneNumber) {
-					phoneNumber = session.phoneNumber;
-					await redis.deleteSession({ sessionId: finalSessionId });
-				}
-			} catch (error) {
-				// Session might be expired or invalid, continue without phoneNumber
-				console.warn('Failed to retrieve session:', error);
+
+			phoneNumber = await redis.getSession({ sessionId }).then((s) => s?.phoneNumber);
+
+			if (!phoneNumber) {
+				throw new Error('Session not found or phone number missing');
 			}
+
+			await redis.deleteSession({ sessionId });
 		}
+
 		const user = await db
 			.insert(users)
 			.values({
 				email: me.email,
+				name: me.name,
+				profilePic: me.profilePic,
+				phoneNumber: phoneNumber ?? '',
 				google_access_token: tokens.access_token,
-				...(phoneNumber ? { phoneNumber } : {}),
 			})
 			.onConflictDoUpdate({
 				target: users.email,
 				set: {
 					google_access_token: tokens.access_token,
-					...(phoneNumber ? { phoneNumber } : {}),
+					phoneNumber: phoneNumber || users.phoneNumber,
 				},
 			})
 			.returning({
 				id: users.id,
 				email: users.email,
-				google_access_token: users.google_access_token,
 				name: users.name,
+				phoneNumber: users.phoneNumber,
+				google_access_token: users.google_access_token,
 				profilePic: users.profilePic,
 			})
 			.get();
@@ -268,6 +264,20 @@ export class AuthService {
 			user: { id: user.id },
 			secret: ctx.env.JWT_SECRET,
 		});
+
+		// set token to redis for whatsapp auth
+		if (phoneNumber) {
+			const redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+
+			if (await redis.getUser({ phoneNumber })) {
+				await redis.updateUser({ phoneNumber, token, expiryInSeconds: 86400 * 30 });
+			} else {
+				await redis.setUser({ phoneNumber, token, expiryInSeconds: 86400 * 30 });
+			}
+		}
 
 		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
 	};
@@ -287,7 +297,7 @@ export class AuthService {
 		}).setSession({
 			phoneNumber,
 			sessionId,
-			expiryInSeconds: 300,
+			expiryInSeconds: 300, // 5 minutes
 		});
 
 		return {
