@@ -5,10 +5,16 @@ from ...schemas import (
     SummaryResult,
     DemistifierOutput,
 )
+from google.adk.models.lite_llm import LiteLlm
 
 risk_evaluator_agent = LlmAgent(
      name="risk_evaluator",
-     model='gemini-2.5-flash',
+     model=LiteLlm(
+        model="gpt-4o-mini",
+        response_format={"type": "text"},
+        force_json=False,
+        temperature=0.1,
+     ),
      instruction="""
      You are an AI Legal Document Risk Evaluator specializing in analyzing legal documents and terms of service.
      
@@ -34,7 +40,12 @@ risk_evaluator_agent = LlmAgent(
 
 risk_phrase_extractor_agent = LlmAgent(
      name="risk_phrase_extractor_agent",
-     model='gemini-2.5-flash',
+     model=LiteLlm(
+        model="gpt-4o-mini",
+        response_format={"type": "text"},
+        force_json=False,
+        temperature=0.1,
+     ),
      instruction="""
      You are an AI Legal Phrase Extractor specializing in identifying specific risky phrases from legal documents.
      
@@ -69,7 +80,12 @@ risk_analyzer_pipeline_agent = SequentialAgent(
 
 summarizer_agent = LlmAgent(
      name="summarizer_agent",
-     model='gemini-2.5-flash',
+     model=LiteLlm(
+        model="gpt-4o-mini",
+        response_format={"type": "text"},
+        force_json=False,
+        temperature=0.1,
+     ),
      instruction="""
      You are an AI Legal Document Summarizer specializing in demystifying complex legal documents.
      
@@ -110,7 +126,12 @@ parallel_demistifier_agent = ParallelAgent(
 # and synthesizes them into a single, structured response with the required schema.
 merger_agent = LlmAgent(
      name="DemistifierMergerAgent",
-     model='gemini-2.5-flash',
+     model=LiteLlm(
+        model="gpt-4o-mini",
+        response_format={"type": "text"},
+        force_json=False,
+        temperature=0.1,
+     ),
      instruction="""
      You are an AI Legal Document Merger specializing in combining analysis results into a comprehensive, user-friendly report.
      
