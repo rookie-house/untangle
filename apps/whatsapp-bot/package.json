@@ -7,6 +7,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "@upstash/redis": "^1.35.3",
     "hono": "^4.9.8"
   },
   "devDependencies": {
