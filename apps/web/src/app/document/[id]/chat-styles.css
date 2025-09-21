@@ -1,0 +1,55 @@
+.reachat-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 500px;
+}
+
+.reachat-message-list {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.reachat-message-input {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.reachat-user-message {
+  background-color: var(--primary);
+  color: white;
+  border-radius: 0.5rem 0.5rem 0 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  max-width: 80%;
+  align-self: flex-end;
+}
+
+.reachat-assistant-message {
+  background-color: var(--secondary);
+  border-radius: 0.5rem 0.5rem 0.5rem 0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  max-width: 80%;
+  align-self: flex-start;
+}
+
+.reachat-message-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.reachat-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.reachat-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
