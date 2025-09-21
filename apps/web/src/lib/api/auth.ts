@@ -12,25 +12,28 @@ export class Auth {
 		data: { name: string; email: string; password: string },
 		sessionId?: string
 	) {
+		const params = sessionId ? { sessionId } : undefined;
 		return this.axios.post(
 			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/signup`,
 			data,
-			{ params: { sessionId } }
+			{ params }
 		);
 	}
 
 	async signin(data: { email: string; password: string }, sessionId?: string) {
+		const params = sessionId ? { sessionId } : undefined;
 		return this.axios.post(
 			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/signin`,
 			data,
-			{ params: { sessionId } }
+			{ params }
 		);
 	}
 
 	async googleSignIn(sessionId?: string) {
+		const params = sessionId ? { sessionId } : undefined;
 		return this.axios.get(
 			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/google`,
-			{ params: { sessionId } }
+			{ params }
 		);
 	}
 
