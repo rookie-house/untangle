@@ -1,4 +1,3 @@
-import { relations } from 'drizzle-orm';
 import { index, int, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable(
@@ -7,6 +6,7 @@ export const users = sqliteTable(
 		id: int().primaryKey({ autoIncrement: true }),
 		name: text(),
 		email: text().notNull(),
+		phoneNumber: text(),
 		password: text(),
 		profilePic: text(),
 		google_access_token: text(),
