@@ -4,6 +4,8 @@ import { Redis } from '@upstash/redis';
 export class RedisClient {
 	private static instance: RedisClient;
 	private client: Redis;
+	private sessionPrefix = 'session:';
+	private userPrefix = 'user:';
 
 	private constructor(
 		private config: {
@@ -18,6 +20,7 @@ export class RedisClient {
 				retries: 5,
 				backoff: (retryCount) => Math.exp(retryCount) * 50,
 			},
+			cache: 'no-cache',
 		});
 	}
 
@@ -26,13 +29,20 @@ export class RedisClient {
 	 * @param config - Redis configuration object containing the URL and token.
 	 * @returns The RedisClient instance.
 	 */
-
 	public static getInstance(config: { url: string; token: string }): RedisClient {
 		// Check if config has changed and recreate instance if needed
 		if (!RedisClient.instance || RedisClient.instance.config.url !== config.url || RedisClient.instance.config.token !== config.token) {
 			RedisClient.instance = new RedisClient(config);
 		}
 		return RedisClient.instance;
+	}
+
+	private _sessionPrefix(sessionId: string): string {
+		return `${this.sessionPrefix}${sessionId}`;
+	}
+
+	private _userPrefix(phoneNumber: string): string {
+		return `${this.userPrefix}${phoneNumber}`;
 	}
 
 	/**
@@ -51,13 +61,17 @@ export class RedisClient {
 		sessionId: string;
 		expiryInSeconds?: number;
 	}): Promise<void> {
-		await this.client.hset(sessionId, {
-			phoneNumber,
-			sessionId,
-		});
+		try {
+			await this.client.hset(this._sessionPrefix(sessionId), {
+				phoneNumber,
+				sessionId,
+			});
 
-		if (expiryInSeconds) {
-			await this.client.expire(sessionId, expiryInSeconds);
+			if (expiryInSeconds) {
+				await this.client.expire(this._sessionPrefix(sessionId), expiryInSeconds);
+			}
+		} catch (error) {
+			console.error('Redis setSession error:', error);
 		}
 	}
 
@@ -67,24 +81,28 @@ export class RedisClient {
 	 * @returns The session data or null if not found.
 	 */
 	async getSession({ sessionId }: { sessionId: string }): Promise<SessionData | null> {
-		const result = await this.client.hgetall(sessionId);
+		try {
+			const result = await this.client.hgetall(this._sessionPrefix(sessionId));
+			// Check if the hash exists and has the required fields
+			if (!result || typeof result !== 'object' || Object.keys(result).length === 0) {
+				return null;
+			}
 
-		// Check if the hash exists and has the required fields
-		if (!result || typeof result !== 'object' || Object.keys(result).length === 0) {
+			const { phoneNumber, sessionId: storedSessionId } = result;
+
+			// Ensure values are strings and not empty
+			if (!phoneNumber || !storedSessionId || typeof phoneNumber !== 'string' || typeof storedSessionId !== 'string') {
+				return null;
+			}
+
+			return {
+				phoneNumber,
+				sessionId: storedSessionId,
+			};
+		} catch (error) {
+			console.error('Redis getSession error:', error);
 			return null;
 		}
-
-		const { phoneNumber, sessionId: storedSessionId } = result;
-
-		// Ensure values are strings and not empty
-		if (!phoneNumber || !storedSessionId || typeof phoneNumber !== 'string' || typeof storedSessionId !== 'string') {
-			return null;
-		}
-
-		return {
-			phoneNumber,
-			sessionId: storedSessionId,
-		};
 	}
 
 	/**
@@ -93,7 +111,12 @@ export class RedisClient {
 	 * @returns The number of keys that were removed.
 	 */
 	async deleteSession({ sessionId }: { sessionId: string }): Promise<number> {
-		return await this.client.del(sessionId);
+		try {
+			return await this.client.del(this._sessionPrefix(sessionId));
+		} catch (error) {
+			console.error('Redis deleteSession error:', error);
+			return 0;
+		}
 	}
 
 	/**
@@ -104,13 +127,17 @@ export class RedisClient {
 	 * @returns A promise that resolves when the user is set.
 	 */
 	async setUser({ phoneNumber, token, expiryInSeconds }: { phoneNumber: string; token: string; expiryInSeconds?: number }): Promise<void> {
-		await this.client.hset(phoneNumber, {
-			phoneNumber,
-			token,
-		});
+		try {
+			await this.client.hset(this._userPrefix(phoneNumber), {
+				phoneNumber,
+				token,
+			});
 
-		if (expiryInSeconds) {
-			await this.client.expire(phoneNumber, expiryInSeconds);
+			if (expiryInSeconds) {
+				await this.client.expire(phoneNumber, expiryInSeconds);
+			}
+		} catch (error) {
+			console.error('Redis setUser error:', error);
 		}
 	}
 
@@ -130,18 +157,22 @@ export class RedisClient {
 		token: string;
 		expiryInSeconds?: number;
 	}): Promise<void> {
-		// Check if user exists first
-		const exists = await this.client.exists(phoneNumber);
-		if (!exists) {
-			throw new Error(`User with phone number ${phoneNumber} does not exist`);
-		}
+		try {
+			// Check if user exists first
+			const exists = await this.client.exists(this._userPrefix(phoneNumber));
+			if (!exists) {
+				throw new Error(`User with phone number ${phoneNumber} does not exist`);
+			}
 
-		await this.client.hset(phoneNumber, {
-			token,
-		});
+			await this.client.hset(this._userPrefix(phoneNumber), {
+				token,
+			});
 
-		if (expiryInSeconds) {
-			await this.client.expire(phoneNumber, expiryInSeconds);
+			if (expiryInSeconds) {
+				await this.client.expire(this._userPrefix(phoneNumber), expiryInSeconds);
+			}
+		} catch (error) {
+			console.error('Redis updateUser error:', error);
 		}
 	}
 
@@ -151,24 +182,29 @@ export class RedisClient {
 	 * @returns The user data or null if not found.
 	 */
 	async getUser({ phoneNumber }: { phoneNumber: string }): Promise<UserData | null> {
-		const result = await this.client.hgetall(phoneNumber);
+		try {
+			const result = await this.client.hgetall(this._userPrefix(phoneNumber));
 
-		// Check if the hash exists and has the required fields
-		if (!result || typeof result !== 'object' || Object.keys(result).length === 0) {
+			// Check if the hash exists and has the required fields
+			if (!result || typeof result !== 'object' || Object.keys(result).length === 0) {
+				return null;
+			}
+
+			const { phoneNumber: storedPhoneNumber, token } = result;
+
+			// Ensure values are strings and not empty
+			if (!storedPhoneNumber || !token || typeof storedPhoneNumber !== 'string' || typeof token !== 'string') {
+				return null;
+			}
+
+			return {
+				phoneNumber: storedPhoneNumber,
+				token,
+			};
+		} catch (error) {
+			console.error('Redis getUser error:', error);
 			return null;
 		}
-
-		const { phoneNumber: storedPhoneNumber, token } = result;
-
-		// Ensure values are strings and not empty
-		if (!storedPhoneNumber || !token || typeof storedPhoneNumber !== 'string' || typeof token !== 'string') {
-			return null;
-		}
-
-		return {
-			phoneNumber: storedPhoneNumber,
-			token,
-		};
 	}
 
 	/**
@@ -177,7 +213,12 @@ export class RedisClient {
 	 * @returns The number of keys that were removed.
 	 */
 	async deleteUser({ phoneNumber }: { phoneNumber: string }): Promise<number> {
-		return await this.client.del(phoneNumber);
+		try {
+			return await this.client.del(this._userPrefix(phoneNumber));
+		} catch (error) {
+			console.error('Redis deleteUser error:', error);
+			return 0;
+		}
 	}
 
 	// Additional utility methods
@@ -187,7 +228,12 @@ export class RedisClient {
 	 * @returns True if the session exists, false otherwise.
 	 */
 	async sessionExists(sessionId: string): Promise<boolean> {
-		return (await this.client.exists(sessionId)) === 1;
+		try {
+			return (await this.client.exists(this._sessionPrefix(sessionId))) === 1;
+		} catch (error) {
+			console.error('Redis sessionExists error:', error);
+			return false;
+		}
 	}
 
 	/**
@@ -196,7 +242,12 @@ export class RedisClient {
 	 * @returns True if the user exists, false otherwise.
 	 */
 	async userExists(phoneNumber: string): Promise<boolean> {
-		return (await this.client.exists(phoneNumber)) === 1;
+		try {
+			return (await this.client.exists(this._userPrefix(phoneNumber))) === 1;
+		} catch (error) {
+			console.error('Redis userExists error:', error);
+			return false;
+		}
 	}
 
 	/**
@@ -205,7 +256,12 @@ export class RedisClient {
 	 * @returns The TTL in seconds, or -1 if the key does not exist.
 	 */
 	async getSessionTTL(sessionId: string): Promise<number> {
-		return await this.client.ttl(sessionId);
+		try {
+			return await this.client.ttl(this._sessionPrefix(sessionId));
+		} catch (error) {
+			console.error('Redis getSessionTTL error:', error);
+			return -1;
+		}
 	}
 
 	/**
@@ -214,11 +270,20 @@ export class RedisClient {
 	 * @returns The TTL in seconds, or -1 if the key does not exist.
 	 */
 	async getUserTTL(phoneNumber: string): Promise<number> {
-		return await this.client.ttl(phoneNumber);
+		try {
+			return await this.client.ttl(this._userPrefix(phoneNumber));
+		} catch (error) {
+			console.error('Redis getUserTTL error:', error);
+			return -1;
+		}
 	}
 
 	// Method to close Redis connection
 	async disconnect(): Promise<void> {
-		RedisClient.instance = null as any;
+		try {
+			RedisClient.instance = null as any;
+		} catch (error) {
+			console.error('Redis disconnect error:', error);
+		}
 	}
 }

@@ -103,31 +103,6 @@ export class AuthController {
 		}
 	};
 
-	public static readonly verifyWhatsAppAuth = async (ctx: Context) => {
-		try {
-			const phoneNumber = ctx.req.query('phoneNumber');
-			if (!phoneNumber) {
-				return ctx.json(
-					api_response({
-						message: 'Phone number is required',
-						is_error: true,
-					}),
-					400,
-				);
-			}
-			const user = await AuthService.verifyWhatsAppAuth({ ctx, phoneNumber });
-			return ctx.json(api_response({ message: 'User signed in', data: user }));
-		} catch (error) {
-			return ctx.json(
-				api_response({
-					message: error instanceof Error ? error.message : 'whatsapp auth failed',
-					is_error: true,
-				}),
-				400,
-			);
-		}
-	};
-
 	public static readonly ping = async (ctx: Context) => {
 		try {
 			const user = ctx.get('user') as IUserContext;

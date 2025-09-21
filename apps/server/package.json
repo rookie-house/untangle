@@ -5,7 +5,7 @@
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
-		"dev": "wrangler dev --remote",
+		"dev": "wrangler dev",
 		"build": "tsc -p .",
 		"deploy": "wrangler deploy --minify",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",

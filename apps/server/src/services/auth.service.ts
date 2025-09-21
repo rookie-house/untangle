@@ -44,8 +44,30 @@ export class AuthService {
 			salt: ctx.env.SALT,
 		});
 
+		let phoneNumber: string | undefined;
+		let redis: RedisClient | undefined;
+
+		
+		if (sessionId) {
+			redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			const session = await redis.getSession({ sessionId });
+			console.log("heloo", session)
+			if (!session || !session.phoneNumber) {
+				console.error("heloo", session)
+				throw new Error('Session not found or phone number missing');
+			}
+			phoneNumber = session.phoneNumber;
+		}
+
 		// Insert new user into the database
-		const newUser = await db.insert(users).values({ email, password: hashedPassword }).returning().get();
+		const newUser = await db
+			.insert(users)
+			.values({ email, password: hashedPassword, phoneNumber: phoneNumber ?? null })
+			.returning()
+			.get();
 
 		if (!newUser) {
 			throw new Error('Failed to create user.');
@@ -56,21 +78,8 @@ export class AuthService {
 			user: { id: newUser.id },
 		});
 
-		if (sessionId) {
-			const redis = RedisClient.getInstance({
-				url: ctx.env.REDIS_URL,
-				token: ctx.env.REDIS_TOKEN,
-			});
-			const session = await redis.getSession({ sessionId });
-			if (!session || !session.phoneNumber) {
-				throw new Error('Session not found or phone number missing');
-			}
-			if (await redis.getUser({ phoneNumber: session.phoneNumber })) {
-				await redis.updateUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
-			} else {
-				await redis.setUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
-			}
-			await db.update(users).set({ phoneNumber: session.phoneNumber }).where(eq(users.id, newUser.id)).run();
+		if (phoneNumber && redis && sessionId) {
+			await this._upsertUserToken({ redis, phoneNumber: phoneNumber, token });
 			await redis.deleteSession({ sessionId });
 		}
 
@@ -111,7 +120,29 @@ export class AuthService {
 			throw new Error('User has no password set. Please use Google Sign-In.');
 		}
 
-		// Verify password
+		let sessionPhoneNumber: string | undefined;
+		let redis: RedisClient | undefined;
+
+		// Validate phone number first if sessionId is provided (before password check)
+		if (sessionId) {
+			redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			const session = await redis.getSession({ sessionId });
+			if (!session || !session.phoneNumber) {
+				throw new Error('Session not found or phone number missing');
+			}
+
+			// Check if the user's phone number matches the session phone number
+			if (user.phoneNumber && user.phoneNumber !== session.phoneNumber) {
+				throw new Error('Phone number mismatch. Please verify your phone number.');
+			}
+
+			sessionPhoneNumber = session.phoneNumber;
+		}
+
+		// Verify password only after phone number validation passes
 		const isPasswordValid = await this._verifyPass({
 			password,
 			hash: user.password,
@@ -121,27 +152,24 @@ export class AuthService {
 			throw new Error('Invalid password');
 		}
 
+		// Update user's phone number if not set and clean up session
+		if (sessionId && redis && sessionPhoneNumber) {
+			if (!user.phoneNumber) {
+				await db.update(users).set({ phoneNumber: sessionPhoneNumber }).where(eq(users.id, user.id)).run();
+			}
+
+			await redis.deleteSession({ sessionId });
+		}
+
+		// Generate token only after all validations pass
 		const token = await this._signToken({
 			user: { id: user.id },
 			secret: ctx.env.JWT_SECRET,
 		});
 
-		if (sessionId) {
-			const redis = RedisClient.getInstance({
-				url: ctx.env.REDIS_URL,
-				token: ctx.env.REDIS_TOKEN,
-			});
-			const session = await redis.getSession({ sessionId });
-			if (!session || !session.phoneNumber) {
-				throw new Error('Session not found or phone number missing');
-			}
-			if (await redis.getUser({ phoneNumber: session.phoneNumber })) {
-				await redis.updateUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
-			} else {
-				await redis.setUser({ phoneNumber: session.phoneNumber, token, expiryInSeconds: 86400 * 30 });
-			}
-			await db.update(users).set({ phoneNumber: session.phoneNumber }).where(eq(users.id, user.id)).run();
-			await redis.deleteSession({ sessionId });
+		// Update Redis with token if sessionId was provided (reuse existing redis instance)
+		if (sessionId && sessionPhoneNumber && redis) {
+			await this._upsertUserToken({ redis, phoneNumber: sessionPhoneNumber, token });
 		}
 
 		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
@@ -272,11 +300,7 @@ export class AuthService {
 				token: ctx.env.REDIS_TOKEN,
 			});
 
-			if (await redis.getUser({ phoneNumber })) {
-				await redis.updateUser({ phoneNumber, token, expiryInSeconds: 86400 * 30 });
-			} else {
-				await redis.setUser({ phoneNumber, token, expiryInSeconds: 86400 * 30 });
-			}
+			await this._upsertUserToken({ redis, phoneNumber, token });
 		}
 
 		return { token, user: { id: user.id, email: user.email, name: user.name, profilePic: user.profilePic } };
@@ -305,29 +329,6 @@ export class AuthService {
 		};
 	};
 
-	public static readonly verifyWhatsAppAuth = async ({ ctx, phoneNumber }: { ctx: Context; phoneNumber: string }) => {
-		const validateEnv = validateEnvironment(ctx);
-
-		if (!validateEnv) {
-			throw new Error('Environment variables are not properly configured.');
-		}
-
-		const redis = RedisClient.getInstance({
-			url: ctx.env.REDIS_URL,
-			token: ctx.env.REDIS_TOKEN,
-		});
-
-		const user = await redis.getUser({ phoneNumber });
-
-		if (!user) {
-			throw new Error('Invalid session or session expired');
-		}
-
-		return {
-			token: user.token,
-		};
-	};
-
 	private static async _hashPass({ password, salt }: { password: string; salt: string }): Promise<string> {
 		return await hash(password, Number(salt));
 	}
@@ -339,6 +340,34 @@ export class AuthService {
 	private static async _signToken({ user, secret }: { user: IJwtUserPayload; secret: string }): Promise<string> {
 		return await sign({ id: user.id }, secret);
 	}
+
+	/**
+	 * Helper function to upsert user token in Redis
+	 * @param redis - Redis client instance
+	 * @param phoneNumber - User's phone number
+	 * @param token - JWT token to store
+	 * @param ttl - Time to live in seconds (optional, defaults to USER_TOKEN_TTL_SECONDS)
+	 */
+	private static async _upsertUserToken({
+		redis,
+		phoneNumber,
+		token,
+		ttl = 86400 * 30, // 30 days
+	}: {
+		redis: RedisClient;
+		phoneNumber: string;
+		token: string;
+		ttl?: number;
+	}): Promise<void> {
+		const existingUser = await redis.getUser({ phoneNumber });
+
+		if (existingUser) {
+			await redis.updateUser({ phoneNumber, token, expiryInSeconds: ttl });
+		} else {
+			await redis.setUser({ phoneNumber, token, expiryInSeconds: ttl });
+		}
+	}
+
 	public static async verifyToken({ token, ctx }: { token: string; ctx: Context }): Promise<IJwtUserPayload | null> {
 		try {
 			const secret = ctx.env.JWT_SECRET;
