@@ -1,7 +1,6 @@
 import { Axios } from "axios";
 import { env } from "../config/env";
 
-
 export class Auth {
 	axios: Axios;
 
@@ -9,19 +8,39 @@ export class Auth {
 		this.axios = axiosInstance;
 	}
 
-	async signup(data: { name: string; email: string; password: string }) {
-		return this.axios.post(`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/signup`, data);
+	async signup(
+		data: { name: string; email: string; password: string },
+		sessionId?: string
+	) {
+		const params = sessionId ? { sessionId } : undefined;
+		return this.axios.post(
+			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/signup`,
+			data,
+			{ params }
+		);
 	}
 
-	async signin(data: { email: string; password: string }) {
-		return this.axios.post(`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/signin`, data);
+	async signin(data: { email: string; password: string }, sessionId?: string) {
+		const params = sessionId ? { sessionId } : undefined;
+		return this.axios.post(
+			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/signin`,
+			data,
+			{ params }
+		);
 	}
 
-	async googleSignIn() {
-		return this.axios.get(`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/google`);
+	async googleSignIn(sessionId?: string) {
+		const params = sessionId ? { sessionId } : undefined;
+		return this.axios.get(
+			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/google`,
+			{ params }
+		);
 	}
 
 	async googleCallback(params: Record<string, string>) {
-		return this.axios.get(`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/google/callback`, { params });
+		return this.axios.get(
+			`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/auth/google/callback`,
+			{ params }
+		);
 	}
 }
