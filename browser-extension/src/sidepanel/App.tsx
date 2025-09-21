@@ -64,6 +64,26 @@ export default function App() {
             { type: "llm", text: message.payload.text },
           ];
         });
+      } else if (message.action === "chatResponse" && message.payload) {
+        setMessages((prevMessages) => {
+          const filteredMessages = prevMessages.filter(
+            (msg) => msg.type !== "loading"
+          );
+          return [
+            ...filteredMessages,
+            { type: "llm", text: message.payload.text },
+          ];
+        });
+      } else if (message.action === "screenshotResponse" && message.payload) {
+        setMessages((prevMessages) => {
+          const filteredMessages = prevMessages.filter(
+            (msg) => msg.type !== "loading"
+          );
+          return [
+            ...filteredMessages,
+            { type: "llm", text: message.payload.text },
+          ];
+        });
       }
     };
 
@@ -82,6 +102,59 @@ export default function App() {
     chrome.runtime.sendMessage({
       action: "takeScreenshot",
     });
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Add user message showing file upload
+        setMessages((prev) => [
+          ...prev,
+          { type: "user", text: `📁 Uploaded file: ${file.name}` },
+          { type: "loading", text: "" },
+        ]);
+
+        // Simulate processing and generate demo response
+        setTimeout(() => {
+          const demoResponse = generateDemoResponse(file.name);
+          setMessages((prev) => {
+            const filteredMessages = prev.filter(msg => msg.type !== "loading");
+            return [
+              ...filteredMessages,
+              { type: "llm", text: demoResponse }
+            ];
+          });
+
+          // Trigger random highlighting on the page
+          chrome.runtime.sendMessage({
+            action: "highlightRandomText",
+            payload: { fileName: file.name }
+          });
+        }, 1500);
+      };
+      
+      if (file.type.startsWith('text/')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const generateDemoResponse = (fileName: string): string => {
+    const responses = [
+      `🔍 **Analysis of ${fileName}:**\n\n✨ **Key Insights:**\n• This document contains valuable information about project requirements\n• Found 3 important action items that need attention\n• Detected potential compliance issues in sections 2-4\n• Recommended next steps: Review with legal team\n\n📊 **Summary:** This file appears to be a critical business document with high priority items.`,
+      
+      `📋 **File Summary for ${fileName}:**\n\n🎯 **Important Findings:**\n• Document contains financial data requiring secure handling\n• 5 key performance indicators identified\n• Risk assessment shows medium-high priority\n• Stakeholder approval needed for next phase\n\n💡 **AI Recommendation:** Schedule review meeting within 48 hours.`,
+      
+      `🔎 **Document Intelligence Results:**\n\n🚀 **Key Highlights:**\n• Technical specifications meet current standards\n• Implementation timeline: 2-3 weeks estimated\n• Resource allocation appears optimal\n• Quality assurance checkpoints established\n\n⚡ **Action Required:** Begin phase 1 implementation immediately.`,
+      
+      `📄 **Content Analysis Complete:**\n\n🎪 **Notable Elements:**\n• Strategic planning document with Q4 objectives\n• Budget allocation requires CFO approval\n• Cross-department collaboration needed\n• Success metrics clearly defined\n\n🔔 **Priority Level:** High - Requires executive review.`
+    ];
+    
+    return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const handleSend = () => {
@@ -165,8 +238,22 @@ export default function App() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             className="chat-input"
-            placeholder="Type a message or take a screenshot..."
+            placeholder="Type a message or upload a file..."
           />
+          <input
+            type="file"
+            id="file-upload"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+            accept=".txt,.pdf,.doc,.docx,.json,.csv,.md"
+          />
+          <button
+            onClick={() => document.getElementById("file-upload")?.click()}
+            className="file-upload-btn"
+            title="Upload File"
+          >
+            📁
+          </button>
           <button
             onClick={handleScreenshot}
             className="screenshot-btn"

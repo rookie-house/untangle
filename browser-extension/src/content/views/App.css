@@ -60,15 +60,91 @@ body {
   opacity: 0;
 }
 
-#crxjs-app {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
+/* Reset any potential conflicts */
+* {
+  box-sizing: border-box;
+}
+
+body {
   background: transparent !important;
-  padding: 1rem;
-  margin: 0.5rem;
-  width: auto;
-  height: auto;
-  box-shadow: none;
+}
+
+#crxjs-app {
+  position: fixed !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  z-index: 2147483647 !important; /* Maximum z-index */
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+  font-family: ui-sans-serif, system-ui, sans-serif !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.toggle-button {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: linear-gradient(135deg, #288cd7, #1e6aa3) !important;
+  transition: all 0.3s ease !important;
+  overflow: hidden !important;
+  font-size: 24px !important;
+  color: white !important;
+  text-decoration: none !important;
+  font-family: inherit !important;
+  outline: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+.toggle-button:hover {
+  background: linear-gradient(135deg, #1e6aa3, #155a87) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.toggle-button:active {
+  transform: translateY(0) !important;
+}
+
+.toggle-button:focus {
+  outline: 2px solid rgba(40, 140, 215, 0.5) !important;
+  outline-offset: 2px !important;
+}
+
+/* Ensure button is always visible */
+.toggle-button::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: inherit !important;
+  border-radius: inherit !important;
+  z-index: -1 !important;
+}
+
+/* Remove any potential inherited styles */
+.toggle-button * {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: inherit !important;
+  color: inherit !important;
 }

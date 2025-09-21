@@ -27,6 +27,14 @@ export default defineManifest({
       js: ["src/content/main.tsx"],
       matches: ["https://*/*", "http://*/*"],
     },
+    {
+      js: ["src/content/test.js"],
+      matches: ["https://*/*", "http://*/*"],
+    },
+    {
+      matches: ["http://localhost:3000/*","https://untangle.rookie.house/*"],
+      js:["src/content.ts"]
+    }
   ],
   side_panel: {
     default_path: "src/sidepanel/index.html",
