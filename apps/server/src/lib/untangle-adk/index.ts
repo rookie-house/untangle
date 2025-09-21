@@ -41,16 +41,16 @@ export class UntangleADK {
 		const { data } = await this.axiosInstance.get('/list-apps');
 		return data;
 	}
-
+	
 	public async getSession(params: IGetSessionParams): Promise<IResponseCreateSession> {
 		const { userId, sessionId } = params;
-		const { data } = await this.axiosInstance.get(`apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId}`);
+		const { data } = await this.axiosInstance.get(`/apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId}`);
 		return data;
 	}
 
 	public async createSession(params: ICreateSessionParams): Promise<IResponseCreateSession> {
 		const { userId, sessionId } = params;
-		const { data } = await this.axiosInstance.post(`apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId}`, {
+		const { data } = await this.axiosInstance.post(`/apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId}`, {
 			userId,
 		});
 		return data;
