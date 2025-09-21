@@ -54,9 +54,7 @@ export class AuthService {
 				token: ctx.env.REDIS_TOKEN,
 			});
 			const session = await redis.getSession({ sessionId });
-			console.log("heloo", session)
 			if (!session || !session.phoneNumber) {
-				console.error("heloo", session)
 				throw new Error('Session not found or phone number missing');
 			}
 			phoneNumber = session.phoneNumber;

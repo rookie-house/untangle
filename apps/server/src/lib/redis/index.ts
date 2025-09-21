@@ -134,7 +134,7 @@ export class RedisClient {
 			});
 
 			if (expiryInSeconds) {
-				await this.client.expire(phoneNumber, expiryInSeconds);
+				await this.client.expire(this._userPrefix(phoneNumber), expiryInSeconds);
 			}
 		} catch (error) {
 			console.error('Redis setUser error:', error);
