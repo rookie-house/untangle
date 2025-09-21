@@ -145,7 +145,7 @@ h6 {
 
 .dark {
   --background: oklch(21.033% 0.00588 285.832);
-  --foreground: oklch(0.985 0.002 247.839);
+  --foreground: oklch(57.707% 0.06781 79.372);
   --card: oklch(0.21 0.034 264.665);
   --card-foreground: oklch(0.985 0.002 247.839);
   --popover: oklch(0.21 0.034 264.665);
@@ -164,8 +164,8 @@ h6 {
   --ring: oklch(0.551 0.027 264.364);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-3: #fe9a00;
+  --chart-4: oklch(62.17% 0.25898 305.305);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.21 0.034 264.665);
   --sidebar-foreground: oklch(0.985 0.002 247.839);
@@ -183,5 +183,13 @@ h6 {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .dark h1, 
+  .dark h2, 
+  .dark h3, 
+  .dark h4, 
+  .dark h5, 
+  .dark h6 {
+    color: #8f754a;
   }
 }
