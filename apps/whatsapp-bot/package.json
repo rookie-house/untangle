@@ -1,23 +1,16 @@
 {
-  "name": "whatsapp-webhook",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "whatsapp-bot",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "axios": "^1.12.2",
-    "body-parser": "^2.2.0",
-    "dotenv": "^17.2.2",
-    "express": "^5.1.0",
-    "fs-extra": "^11.3.1",
-    "mammoth": "^1.10.0",
-    "node-fetch": "^3.3.2",
-    "pdf-parse": "^1.1.1",
-    "tesseract.js": "^6.0.1"
+    "hono": "^4.9.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250913.0",
+    "wrangler": "^4.4.0"
   }
 }
