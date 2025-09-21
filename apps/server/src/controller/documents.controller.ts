@@ -18,25 +18,18 @@ export class DocumentsController {
 				return ctx.json(api_response({ message: 'Database not found', is_error: true }), 404);
 			}
 
-			const body = await ctx.req.parseBody();
-			const file = body['file'];
-			const sessionId = body['sessionId'];
+			const form = await ctx.req.formData();
+			const file = form.get('file') as File | null;
 
 			if (!(file instanceof File)) {
 				return ctx.json({ error: 'No file uploaded' }, 400);
 			}
-			if (typeof sessionId !== 'string') {
-				return ctx.json({ error: 'Missing sessionId' }, 400);
-			}
-
-			const buffer = await file.arrayBuffer();
 
 			const document = await DocumentsService.uploadFile({
 				ctx,
 				fileName: file.name,
-				body: buffer,
+				body: file,
 				userId: user.id,
-				sessionId,
 				type: file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : 'other',
 				db,
 			});
@@ -113,7 +106,7 @@ export class DocumentsController {
 				return ctx.json(api_response({ message: 'Document ID is required', is_error: true }), 400);
 			}
 
-			const document = await DocumentsService.getDocumentById({ ctx, documentId: Number(id), userId: user.id, db });
+			const document = await DocumentsService.getDocumentById({ documentId: id, userId: user.id, db });
 
 			return ctx.json(
 				api_response({

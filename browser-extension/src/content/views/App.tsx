@@ -1,23 +1,26 @@
-import Logo from '@/assets/crx.svg'
-import { useState } from 'react'
-import './App.css'
+import Logo from "@/assets/crx.svg";
+import "./App.css";
 
 function App() {
-  const [show, setShow] = useState(false)
-  const toggle = () => setShow(!show)
+  const openSidePanel = async () => {
+    try {
+      await chrome.runtime.sendMessage({
+        action: "openSidePanelRequest",
+      });
+      console.log("Request sent to open side panel.");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert(
+        "Could not send a request to open side panel. See console for details."
+      );
+    }
+  };
 
   return (
-    <div className="popup-container">
-      {show && (
-        <div className={`popup-content ${show ? 'opacity-100' : 'opacity-0'}`}>
-          <h1>HELLO CRXJS</h1>
-        </div>
-      )}
-      <button className="toggle-button" onClick={toggle}>
-        <img src={Logo} alt="CRXJS logo" className="button-icon" />
-      </button>
-    </div>
-  )
+    <button className="toggle-button" onClick={openSidePanel}>
+      <img src={Logo} alt="CRXJS logo" className="button-icon" />
+    </button>
+  );
 }
 
-export default App
+export default App;

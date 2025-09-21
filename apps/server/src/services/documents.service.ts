@@ -1,7 +1,7 @@
 import { documents } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import type { DbType } from '@/types/user';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import type { Context } from 'hono';
 
 export class DocumentsService {
@@ -9,29 +9,29 @@ export class DocumentsService {
 		body,
 		ctx,
 		fileName,
-		sessionId,
 		type,
 		userId,
 		db,
 	}: {
 		ctx: Context;
 		fileName: string;
-		body: ArrayBuffer;
+		body: File;
 		userId: number;
-		sessionId: string;
-		type: 'image' | 'pdf' | 'other';
 		db: DbType;
+		type: 'image' | 'pdf' | 'other';
 	}) => {
 		const keyId = crypto.randomUUID();
 
-		const r2 = R2.getInstance(ctx.env.BUCKET, ctx.env.BASE_URL, ctx.env.SECRET);
+		const r2 = R2.getInstance(ctx.env.BUCKET, ctx.env.BASE_URL);
 
-		const { key, url } = await r2.upload(keyId, body);
+		const mimeType = type === 'image' ? 'image/png' : type === 'pdf' ? 'application/pdf' : 'application/octet-stream';
+		const uploadResult = await r2.upload(keyId, body, { httpMetadata: { contentType: mimeType } });
 
-		if (!key) {
+		const { key, url, success } = uploadResult;
+
+		if (!success || !key) {
 			throw new Error('File upload failed');
 		}
-
 		if (!url) {
 			throw new Error('File retrieval failed');
 		}
@@ -39,12 +39,11 @@ export class DocumentsService {
 		const document = await db
 			.insert(documents)
 			.values({
+				id: keyId,
 				url: url,
 				userId: userId,
 				title: fileName,
 				type: type,
-				sessionId: Number(sessionId),
-				r2_key: keyId,
 			})
 			.returning();
 
@@ -75,17 +74,7 @@ export class DocumentsService {
 		return { documents: documentsList };
 	};
 
-	public static readonly getDocumentById = async ({
-		ctx,
-		documentId,
-		db,
-		userId,
-	}: {
-		ctx: Context;
-		documentId: number;
-		userId: number;
-		db: DbType;
-	}) => {
+	public static readonly getDocumentById = async ({ documentId, db, userId }: { documentId: string; userId: number; db: DbType }) => {
 		const document = await db
 			.select()
 			.from(documents)
@@ -115,7 +104,7 @@ export class DocumentsService {
 		const documentsList = await db
 			.select()
 			.from(documents)
-			.where(eq(documents.sessionId, Number(sessionId)) && eq(documents.userId, userId))
+			.where(and(eq(documents.sessionId, sessionId), eq(documents.userId, userId)))
 			.limit(pageSize)
 			.offset(offset);
 

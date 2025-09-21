@@ -1,28 +1,9 @@
-import { signupSchema, authSchema } from "../lib/validations/auth.validation";
-import { create } from "zustand";
-import { signup, signin, googleSignIn, googleCallback } from "../lib/api/auth";
+import { signupSchema, authSchema } from "../lib/validation/auth.schema";
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  profile_picture?: string;
-  created_at: string;
-  updated_at: string;
-};
+import api from "@/lib/api";
 
-interface AuthState {
-  user: User | null;
-  setUser: (user: User | null) => void;
-}
-
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-}));
-
+import { useAuthStore } from "../store/auth.store";
 import { useState } from "react";
-import Error from "next/error";
 
 function extractErrorMessage(err: unknown, fallback: string) {
   if (typeof err === "string") return err;
@@ -50,7 +31,7 @@ export function useAuth() {
     setError(null);
     try {
       signupSchema.parse(data);
-      const res = await signup(data);
+      const res = await api.auth.signup(data);
       setUser(res.data.user);
       return res.data;
     } catch (err: unknown) {
@@ -67,7 +48,7 @@ export function useAuth() {
     setError(null);
     try {
       authSchema.parse(data);
-      const res = await signin(data);
+      const res = await api.auth.signin(data);
       setUser(res.data.user);
       return res.data;
     } catch (err: unknown) {
@@ -83,9 +64,10 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await googleSignIn();
+      const res = await api.auth.googleSignIn();
       if (res.data?.url) {
-        window.location.href = res.data.url.url;
+        // console.log(res.data.url)
+        window.location.href = res.data.url;
       }
     } catch (err: unknown) {
       const errorMessage = extractErrorMessage(err, "Google sign-in failed");
@@ -100,7 +82,7 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await googleCallback(params);
+      const res = await api.auth.googleCallback(params);
       setUser(res.data.user);
       return res.data;
     } catch (err: unknown) {

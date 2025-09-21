@@ -1,3 +1,7 @@
+body {
+  background: transparent !important;
+}
+
 .popup-container {
   position: fixed;
   right: 0;
@@ -18,7 +22,8 @@
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.1),
     0 2px 4px -2px rgb(0 0 0 / 0.1);
-  width: max-content;
+  width: 10px; /* decreased width */
+  max-width: 90vw;
   height: min-content;
   padding: 0.5rem 1rem;
   margin: auto 0.5rem 0 0;
@@ -53,4 +58,17 @@
 
 .opacity-0 {
   opacity: 0;
+}
+
+#crxjs-app {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: transparent !important;
+  padding: 1rem;
+  margin: 0.5rem;
+  width: auto;
+  height: auto;
+  box-shadow: none;
 }

@@ -10,8 +10,9 @@ app.use(logger());
 app.use('*', async (c, next) => {
 	const corsMiddleware = cors({
 		origin: ['http://localhost:3000', 'https://untangle.rookie.house'],
-		allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+		allowMethods: ['GET', 'POST', 'PUT', 'DELETE', "OPTIONS"],
 		allowHeaders: ['Content-Type', 'Authorization'],
+		credentials: true,
 	});
 	return corsMiddleware(c, next);
 });
