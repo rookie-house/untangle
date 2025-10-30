@@ -1,18 +1,21 @@
-import React from 'react'
+import { Sidebar } from '@/components/sidebar/sidebar'
+import { Header } from '@/components/header'
 
-export default function Layout({
+export default function DashboardLayout({
     children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+}: {
+    children: React.ReactNode
+}) {
     return (
-        <div className="min-h-screen flex flex-col">
-            <main className="flex-1">
-                {children}
-            </main>
-            <footer className="p-4 bg-background text-sm text-center">
-                &copy; {new Date().getFullYear()} Untangle
-            </footer>
+        <div className="flex min-h-screen bg-gray-50">
+            <Sidebar />
+            {/* Main Content */}
+            <div className="flex-1 pl-64">
+                <Header />
+                <main className="flex-1 p-6">
+                    {children}
+                </main>
+            </div>
         </div>
     )
 }

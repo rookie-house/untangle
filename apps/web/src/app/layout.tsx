@@ -43,7 +43,7 @@ export default function RootLayout({
         <Suspense fallback={<div />}>
           <Providers>
             <div className="fixed p-5 top-4 z-50 flex items-center bg-none space-x-4 h-10">
-              <Link href="/" className="flex items-center gap-3 h-full">
+              {/* <Link href="/" className="flex items-center gap-3 h-full">
                 <Image
                   src="/logo.png"
                   alt="Untangle Logo"
@@ -52,7 +52,7 @@ export default function RootLayout({
                   className="h-[30px] w-auto"
                 />
                 <span>Untangle</span>
-              </Link>
+              </Link> */}
               <div className="">
                 {/* <ThemeToggle /> */}
               </div>
