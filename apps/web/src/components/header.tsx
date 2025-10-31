@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/search-bar"
 
 export function Header() {
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-white">
+        <header className="sticky top-0 z-10 w-full border-b bg-[#F0F4F9]">
             <div className="flex h-16 items-center px-6 justify-between">
                 <SearchBar />
 

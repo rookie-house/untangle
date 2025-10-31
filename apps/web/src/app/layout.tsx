@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className="dark"
+      className=""
       lang="en">
       <head>
         {/* Preconnect and Google Fonts for Figtree and Rubik */}
@@ -42,24 +42,6 @@ export default function RootLayout({
       >
         <Suspense fallback={<div />}>
           <Providers>
-            <div className="fixed p-5 top-4 z-50 flex items-center bg-none space-x-4 h-10">
-              {/* <Link href="/" className="flex items-center gap-3 h-full">
-                <Image
-                  src="/logo.png"
-                  alt="Untangle Logo"
-                  width={100}
-                  height={100}
-                  className="h-[30px] w-auto"
-                />
-                <span>Untangle</span>
-              </Link> */}
-              <div className="">
-                {/* <ThemeToggle /> */}
-              </div>
-              <div className="h-full flex items-center">
-                {/* <FloatingHeader /> */}
-              </div>
-            </div>
             {children}
           </Providers>
         </Suspense>

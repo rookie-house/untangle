@@ -1,6 +1,7 @@
 "use client";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { SidebarProvider } from '@/components/providers/sidebar-provider';
 
 const queryClient = new QueryClient();
 
@@ -11,7 +12,9 @@ export function Providers({
 }>) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <SidebarProvider>
+        {children}
+      </SidebarProvider>
     </QueryClientProvider>
   );
 }

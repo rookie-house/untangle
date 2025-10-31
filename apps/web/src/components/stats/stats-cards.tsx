@@ -10,17 +10,17 @@ interface StatCardProps {
 
 function StatCard({ title, value, subtitle, bgColor }: StatCardProps) {
     return (
-        <Card className={`p-6 relative h-[258px] text-black w-[234px] flex items-center justify-between flex-col rounded-4xl rounded-br-none ${bgColor}`}>
-            <div className="flex flex-col gap-2 w-full">
+        <Card className={` relative h-[258px] overflow-hidden text-black w-[234px] flex flex-col justify-between rounded-4xl rounded-br-none ${bgColor}`}>
+            <div className="flex p-6 flex-col gap-2 h-full w-full">
                 <div className="flex justify-between text-2xl font-medium items-start">{title}</div>
                 <div className="flex text-base flex-col">{subtitle}</div>
             </div>
-            <div className="text-5xl flex w-full items-start font-bold">
+            <div className="text-5xl p-6 flex w-full h-full items-start font-bold">
                 {value}
             </div>
 
             <div className="absolute -bottom-0.5 rounded-tl-[25%] bg-white  -right-0.5 size-[72px] p-3">
-                <div className="size-12 bg-gray-700 rounded-full flex items-center justify-center">
+                <div className="size-12 bg-gray-700 rounded-full  flex items-center justify-center">
                     <ArrowUpRight className="h-6 w-6 text-white" />
                 </div>
             </div>
@@ -33,7 +33,7 @@ export function StatsCards() {
         {
             title: "Total Documents Summarized",
             value: "55",
-            subtitle: "Total Documents",
+            subtitle: "Total Documents that are sumarized",
             bgColor: "bg-[#FBE9D0]"
         },
         {
@@ -45,7 +45,7 @@ export function StatsCards() {
         {
             title: "T&C Summarized",
             value: "24",
-            subtitle: "summaries so far",
+            subtitle: "Terms and Conditions summaries so far",
             bgColor: "bg-[#E4E3E8]"
         }
     ]
