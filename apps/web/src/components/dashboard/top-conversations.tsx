@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card"
 import { MoreHorizontal } from "lucide-react"
-import Image from "next/image"
 
 interface TopConversation {
     id: string

@@ -1,11 +1,10 @@
 "use client";
-import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutGrid, FileText, MessageSquare, Settings, CopyIcon, LogOut, Menu } from 'lucide-react'
-import { SidebarContext, useSidebar } from '@/components/providers/sidebar-provider'
-import { cn } from '@/lib/utils'
-import { useContext, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutGrid, FileText, MessageSquare, Settings, CopyIcon, Menu } from 'lucide-react';
+import { useSidebar } from '@/components/providers/sidebar-provider';
+import { cn } from '@/lib/utils';
 
 const navigation = [
     {

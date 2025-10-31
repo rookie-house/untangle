@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useDemoDocuments } from '@/hooks/useDemoDocuments';
 import { Button } from '@/components/ui/button';

@@ -2,16 +2,14 @@
 
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { Header } from '@/components/header'
-import { SidebarProvider, useSidebar } from '@/components/providers/sidebar-provider'
-import { SidebarContext } from '@/components/providers/sidebar-provider'
-import { useContext } from 'react'
+import { useSidebar } from '@/components/providers/sidebar-provider'
 
 function DashboardLayoutContent({
     children,
 }: {
     children: React.ReactNode
 }) {
-    const { isOpen } = useSidebar()
+    const { isOpen, toggle } = useSidebar()
 
     return (
         <div className="flex min-h-screen bg-[#F0F4F9]">
@@ -19,7 +17,7 @@ function DashboardLayoutContent({
             {isOpen && (
                 <div
                     className="fixed inset-0 z-30 bg-green-500/50 transition-all lg:hidden"
-                    onClick={() => useSidebar().toggle()}
+                    onClick={() => toggle()}
                 />
             )}
             <Sidebar />

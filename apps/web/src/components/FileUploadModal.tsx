@@ -1,8 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { FiUpload, FiX } from 'react-icons/fi';
-import { useDocuments } from '@/hooks/useDocuments';
 import { useDemoDocuments } from '@/hooks/useDemoDocuments';
 
 interface FileUploadModalProps {

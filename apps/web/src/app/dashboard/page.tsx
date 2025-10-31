@@ -2,8 +2,7 @@ import { StatsCards } from "@/components/stats/stats-cards"
 import { RecentDocuments } from "@/components/dashboard/recent-documents"
 import { UsageMeter } from "@/components/dashboard/usage-meter"
 import { TopConversations } from "@/components/dashboard/top-conversations"
-import { Button } from "@/components/ui/button"
-import { Clock, Sparkles } from "lucide-react"
+import { Clock } from "lucide-react"
 
 export default function DashboardPage() {
   return (

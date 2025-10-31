@@ -1,5 +1,4 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
 
 import { defaultEmptyString } from "@/lib/validation/base.schema";
 

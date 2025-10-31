@@ -1,5 +1,5 @@
 "use client"
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import TailwindBoxLoader from '@/app/_components/loader';
