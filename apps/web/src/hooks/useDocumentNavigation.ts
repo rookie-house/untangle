@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { Document } from "@/types/document";
+import { useRouter } from 'next/navigation';
+import { Document } from '@/types/document';
 
 export const useDocumentNavigation = () => {
   const router = useRouter();

@@ -1,11 +1,11 @@
-import { Axios } from "axios";
-import { Document } from "@/types/document";
+import { Axios } from 'axios';
+// import { Document } from "@/types/document";
 
 export class Documents {
   constructor(private readonly axios: Axios) {}
 
   async getDocuments(params?: { pageSize?: number; offset?: number }) {
-    const response = await this.axios.get("/documents/all", { params });
+    const response = await this.axios.get('/documents/all', { params });
     return response.data;
   }
 
@@ -21,11 +21,11 @@ export class Documents {
 
   async uploadDocument(file: File) {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
-    const response = await this.axios.put("/documents/upload", formData, {
+    const response = await this.axios.put('/documents/upload', formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        'Content-Type': 'multipart/form-data',
       },
     });
     return response.data;

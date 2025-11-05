@@ -1,6 +1,6 @@
-import { createEnv } from "@t3-oss/env-nextjs";
+import { createEnv } from '@t3-oss/env-nextjs';
 
-import { defaultEmptyString } from "@/lib/validation/base.schema";
+import { defaultEmptyString } from '@/lib/validation/base.schema';
 
 export const env = createEnv({
   client: {

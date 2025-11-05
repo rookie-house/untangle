@@ -1,8 +1,8 @@
-import { StatsCards } from "@/components/stats/stats-cards"
-import { RecentDocuments } from "@/components/dashboard/recent-documents"
-import { UsageMeter } from "@/components/dashboard/usage-meter"
-import { TopConversations } from "@/components/dashboard/top-conversations"
-import { Clock } from "lucide-react"
+import { StatsCards } from '@/components/stats/stats-cards';
+import { RecentDocuments } from '@/components/dashboard/recent-documents';
+import { UsageMeter } from '@/components/dashboard/usage-meter';
+import { TopConversations } from '@/components/dashboard/top-conversations';
+import { Clock } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
@@ -12,9 +12,7 @@ export default function DashboardPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-semibold">Hello John,</h1>
-            <p className="text-gray-500 mt-1">
-              Explore content more deeply and effectively.
-            </p>
+            <p className="text-gray-500 mt-1">Explore content more deeply and effectively.</p>
           </div>
         </div>
 
@@ -29,23 +27,16 @@ export default function DashboardPage() {
       <div className=" h-full w-full flex flex-col gap-6">
         <div className="p-4 w-full rounded-full bg-gray-200 flex items-center justify-center gap-4">
           <Clock />
-          <span className="flex items-center text-2xl font-medium text-black">
-            15 Risks Saved
-          </span>
+          <span className="flex items-center text-2xl font-medium text-black">15 Risks Saved</span>
         </div>
 
         <div className="border border-gray-200 rounded-lg p-2">
-          <UsageMeter
-            percentage={75}
-            usedCount={3}
-            totalCount={4}
-            plan="Pro"
-          />
+          <UsageMeter percentage={75} usedCount={3} totalCount={4} plan="Pro" />
         </div>
         <div className="border border-gray-200 rounded-lg p-2">
           <TopConversations />
         </div>
       </div>
     </div>
-  )
+  );
 }

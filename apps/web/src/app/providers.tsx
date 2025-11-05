@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { SidebarProvider } from '@/components/providers/sidebar-provider';
@@ -6,15 +6,13 @@ import { SidebarProvider } from '@/components/providers/sidebar-provider';
 const queryClient = new QueryClient();
 
 export function Providers({
-  children
+  children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        {children}
-      </SidebarProvider>
+      <SidebarProvider>{children}</SidebarProvider>
     </QueryClientProvider>
   );
 }

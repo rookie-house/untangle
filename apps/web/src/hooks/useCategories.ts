@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import api from "@/lib/api";
-import { Category } from "@/types/document";
-import { useAuth } from "./useAuth";
+import { useState, useEffect, useCallback } from 'react';
+import api from '@/lib/api';
+import { Category } from '@/types/document';
+import { useAuth } from './useAuth';
 
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -23,8 +23,8 @@ export function useCategories() {
         setCategories(response.data);
       }
     } catch (err) {
-      console.error("Error fetching categories:", err);
-      setError("Failed to load categories");
+      console.error('Error fetching categories:', err);
+      setError('Failed to load categories');
     } finally {
       setLoading(false);
     }
@@ -42,8 +42,8 @@ export function useCategories() {
       await fetchCategories();
       return response.data;
     } catch (err) {
-      console.error("Error creating category:", err);
-      setError("Failed to create category");
+      console.error('Error creating category:', err);
+      setError('Failed to create category');
       return null;
     } finally {
       setLoading(false);
@@ -59,13 +59,11 @@ export function useCategories() {
     try {
       const response = await api.categories.updateCategory(id, name);
       // Update the category in the local state
-      setCategories((prev) =>
-        prev.map((cat) => (cat.id === id ? { ...cat, name } : cat))
-      );
+      setCategories((prev) => prev.map((cat) => (cat.id === id ? { ...cat, name } : cat)));
       return response.data;
     } catch (err) {
-      console.error("Error updating category:", err);
-      setError("Failed to update category");
+      console.error('Error updating category:', err);
+      setError('Failed to update category');
       return null;
     } finally {
       setLoading(false);
@@ -84,8 +82,8 @@ export function useCategories() {
       setCategories((prev) => prev.filter((cat) => cat.id !== id));
       return response.data;
     } catch (err) {
-      console.error("Error deleting category:", err);
-      setError("Failed to delete category");
+      console.error('Error deleting category:', err);
+      setError('Failed to delete category');
       return null;
     } finally {
       setLoading(false);

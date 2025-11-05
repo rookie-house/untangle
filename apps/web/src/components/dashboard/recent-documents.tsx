@@ -1,33 +1,33 @@
-import { ArrowUpRight } from "lucide-react"
-import { Card } from "@/components/ui/card"
+import { ArrowUpRight } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface RecentDocument {
-  id: string
-  title: string
-  timeAgo: string
-  image: string
+  id: string;
+  title: string;
+  timeAgo: string;
+  image: string;
 }
 
 const recentDocuments: RecentDocument[] = [
   {
-    id: "1",
-    title: "Analyzing Driving License Agreements.",
-    timeAgo: "1 day ago",
-    image: "/images/documents/license.png"
+    id: '1',
+    title: 'Analyzing Driving License Agreements.',
+    timeAgo: '1 day ago',
+    image: '/images/documents/license.png',
   },
   {
-    id: "2",
-    title: "Summarizing Terms and Conditions for Upstock.",
-    timeAgo: "1 day ago",
-    image: "/images/documents/terms.png"
+    id: '2',
+    title: 'Summarizing Terms and Conditions for Upstock.',
+    timeAgo: '1 day ago',
+    image: '/images/documents/terms.png',
   },
   {
-    id: "3",
-    title: "Documents required to apply for PAN card",
-    timeAgo: "1 day ago",
-    image: "/images/documents/pan.png"
-  }
-]
+    id: '3',
+    title: 'Documents required to apply for PAN card',
+    timeAgo: '1 day ago',
+    image: '/images/documents/pan.png',
+  },
+];
 
 export function RecentDocuments() {
   return (
@@ -53,9 +53,7 @@ export function RecentDocuments() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 truncate">
-                  {doc.title}
-                </h3>
+                <h3 className="font-medium text-gray-900 truncate">{doc.title}</h3>
                 <p className="text-sm text-gray-500">{doc.timeAgo}</p>
               </div>
 
@@ -67,5 +65,5 @@ export function RecentDocuments() {
         </div>
       </div>
     </Card>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import { Axios } from "axios";
-import { Category } from "@/types/document";
+import { Axios } from 'axios';
+// import { Category } from "@/types/document";
 
 export class Categories {
   constructor(private readonly axios: Axios) {}
 
   async getCategories() {
-    const response = await this.axios.get("/categories");
+    const response = await this.axios.get('/categories');
     return response.data;
   }
 
   async createCategory(name: string) {
-    const response = await this.axios.post("/categories", { name });
+    const response = await this.axios.post('/categories', { name });
     return response.data;
   }
 
