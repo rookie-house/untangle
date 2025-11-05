@@ -18,6 +18,8 @@ import {
 import Link from 'next/link';
 import { Document } from '@/types/document';
 
+export const runtime = 'edge';
+
 interface Message {
   id: string;
   content: string;
