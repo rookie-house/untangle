@@ -1,15 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import api from "@/lib/api";
-import { Document } from "@/types/document";
-import { useAuth } from "./useAuth";
+import { useState, useEffect, useCallback } from 'react';
+import api from '@/lib/api';
+import { Document } from '@/types/document';
+import { useAuth } from './useAuth';
 
 export function useDocuments() {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
-    null
-  );
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -27,8 +25,8 @@ export function useDocuments() {
           setDocuments(response.data);
         }
       } catch (err) {
-        console.error("Error fetching documents:", err);
-        setError("Failed to load documents");
+        console.error('Error fetching documents:', err);
+        setError('Failed to load documents');
       } finally {
         setLoading(false);
       }
@@ -47,8 +45,8 @@ export function useDocuments() {
       setSelectedDocument(response.data);
       return response.data;
     } catch (err) {
-      console.error("Error fetching document:", err);
-      setError("Failed to load document");
+      console.error('Error fetching document:', err);
+      setError('Failed to load document');
       return null;
     } finally {
       setLoading(false);
@@ -68,8 +66,8 @@ export function useDocuments() {
       }
       return response.data;
     } catch (err) {
-      console.error("Error fetching session documents:", err);
-      setError("Failed to load session documents");
+      console.error('Error fetching session documents:', err);
+      setError('Failed to load session documents');
       return null;
     } finally {
       setLoading(false);
@@ -88,38 +86,30 @@ export function useDocuments() {
       await fetchDocuments();
       return response.data;
     } catch (err) {
-      console.error("Error uploading document:", err);
-      setError("Failed to upload document");
+      console.error('Error uploading document:', err);
+      setError('Failed to upload document');
       return null;
     } finally {
       setLoading(false);
     }
   };
 
-  const updateDocumentCategory = async (
-    documentId: number,
-    categoryId: number | null
-  ) => {
+  const updateDocumentCategory = async (documentId: number, categoryId: number | null) => {
     if (!user) return null;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await api.documents.updateDocumentCategory(
-        documentId,
-        categoryId
-      );
+      const response = await api.documents.updateDocumentCategory(documentId, categoryId);
       // Update the document in the local state
       setDocuments((prev) =>
-        prev.map((doc) =>
-          doc.id === documentId ? { ...doc, categoryId } : doc
-        )
+        prev.map((doc) => (doc.id === documentId ? { ...doc, categoryId } : doc))
       );
       return response.data;
     } catch (err) {
-      console.error("Error updating document category:", err);
-      setError("Failed to update document category");
+      console.error('Error updating document category:', err);
+      setError('Failed to update document category');
       return null;
     } finally {
       setLoading(false);

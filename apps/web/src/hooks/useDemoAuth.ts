@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { mockUser } from "@/lib/demo-data";
+import { useState } from 'react';
+import { mockUser } from '@/lib/demo-data';
 
 export function useDemoAuth() {
   const [user, setUser] = useState(mockUser);

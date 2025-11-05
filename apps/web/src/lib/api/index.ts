@@ -1,9 +1,9 @@
-import axios, { Axios } from "axios";
-import { Auth } from "./auth";
-import { Documents } from "./documents";
-import { Categories } from "./categories";
+import axios, { Axios } from 'axios';
+import { Auth } from './auth';
+import { Documents } from './documents';
+import { Categories } from './categories';
 // import Cookies from "js-cookie";
-import { env } from "../config/env";
+import { env } from '../config/env';
 
 class API {
   private readonly _axios: Axios;

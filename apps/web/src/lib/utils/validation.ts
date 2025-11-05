@@ -1,4 +1,4 @@
-type Nullish<T> = T | null | undefined
+type Nullish<T> = T | null | undefined;
 
 export const checkIfBigint = (value: Nullish<string>): value is string => {
   try {
@@ -12,4 +12,4 @@ export const checkIfBigint = (value: Nullish<string>): value is string => {
 };
 
 export const checkIfValidString = (value: Nullish<string>): value is string =>
-  value !== undefined && value !== null && value.trim() !== "";
+  value !== undefined && value !== null && value.trim() !== '';

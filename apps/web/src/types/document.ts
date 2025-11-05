@@ -1,7 +1,7 @@
 export interface Document {
   id: number;
   title: string;
-  type: "image" | "pdf" | "other";
+  type: 'image' | 'pdf' | 'other';
   url: string;
   userId: number;
   categoryId?: number | null;

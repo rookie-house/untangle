@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import { mockCategories } from "@/lib/demo-data";
-import { Category } from "@/types/document";
+import { useState, useCallback, useEffect } from 'react';
+import { mockCategories } from '@/lib/demo-data';
+import { Category } from '@/types/document';
 
 export function useDemoCategories() {
   // Initialize with mock categories immediately
@@ -20,8 +20,8 @@ export function useDemoCategories() {
     try {
       setCategories(mockCategories);
     } catch (err) {
-      console.error("Error fetching categories:", err);
-      setError("Failed to load categories");
+      console.error('Error fetching categories:', err);
+      setError('Failed to load categories');
     } finally {
       setLoading(false);
     }
@@ -36,8 +36,7 @@ export function useDemoCategories() {
 
     try {
       // Get the highest ID from existing categories
-      const highestId =
-        categories.length > 0 ? Math.max(...categories.map((c) => c.id)) : 0;
+      const highestId = categories.length > 0 ? Math.max(...categories.map((c) => c.id)) : 0;
 
       const newCategory: Category = {
         id: highestId + 1,
@@ -47,13 +46,13 @@ export function useDemoCategories() {
         updatedAt: new Date().toISOString(),
       };
 
-      console.log("Creating new category:", newCategory);
+      console.log('Creating new category:', newCategory);
       setCategories((prev) => [...prev, newCategory]);
-      console.log("Categories after update:", [...categories, newCategory]);
+      console.log('Categories after update:', [...categories, newCategory]);
       return newCategory;
     } catch (err) {
-      console.error("Error creating category:", err);
-      setError("Failed to create category");
+      console.error('Error creating category:', err);
+      setError('Failed to create category');
       return null;
     } finally {
       setLoading(false);
@@ -71,9 +70,7 @@ export function useDemoCategories() {
       // Update the category in the local state
       setCategories((prev) =>
         prev.map((cat) =>
-          cat.id === id
-            ? { ...cat, name, updatedAt: new Date().toISOString() }
-            : cat
+          cat.id === id ? { ...cat, name, updatedAt: new Date().toISOString() } : cat
         )
       );
 
@@ -82,8 +79,8 @@ export function useDemoCategories() {
         ? { ...updatedCategory, name, updatedAt: new Date().toISOString() }
         : null;
     } catch (err) {
-      console.error("Error updating category:", err);
-      setError("Failed to update category");
+      console.error('Error updating category:', err);
+      setError('Failed to update category');
       return null;
     } finally {
       setLoading(false);
@@ -103,8 +100,8 @@ export function useDemoCategories() {
       setCategories((prev) => prev.filter((cat) => cat.id !== id));
       return categoryToDelete || null;
     } catch (err) {
-      console.error("Error deleting category:", err);
-      setError("Failed to delete category");
+      console.error('Error deleting category:', err);
+      setError('Failed to delete category');
       return null;
     } finally {
       setLoading(false);
