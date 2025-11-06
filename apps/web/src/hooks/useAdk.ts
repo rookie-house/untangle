@@ -91,8 +91,8 @@ export function useAdk() {
     setError(null);
     try {
       // Step 1: Send user message to API
-      const res = await api.adk.startChat(payload);
-      const response = res.data.data;
+      const { data } = await api.adk.startChat(payload);
+      const response = data.data;
 
       // Step 2: Create user message object with explicit 'user' role
       const userMessage: Message = {

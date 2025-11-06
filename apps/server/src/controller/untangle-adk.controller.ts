@@ -70,28 +70,13 @@ export class UntangleADKController {
 				// 		mimeType: item.type === 'image' ? 'image/*' : item.type === 'pdf' ? 'application/pdf' : 'application/octet-stream',
 				// 	})) || [],
 
-				inlineFiles: await Promise.all((Array.isArray(body.img) ? body.img : []).map(async (item) => {
-					let base64Data = '';
-					if ('data' in item) {
-						const itemData = item.data;
-						if (typeof itemData === 'string') {
-							base64Data = itemData;
-						} else if (itemData instanceof Buffer) {
-							base64Data = itemData.toString('base64');
-						} else if (itemData instanceof File || itemData instanceof Blob) {
-							base64Data = Buffer.from(await itemData.arrayBuffer()).toString('base64');
-						}
-					} else if (item instanceof Buffer) {
-						base64Data = item.toString('base64');
-					} else if (item instanceof File || item instanceof Blob) {
-						base64Data = Buffer.from(await item.arrayBuffer()).toString('base64');
-					}
+				inlineFiles: (body.img || []).map((item) => {
 					return {
-						displayName: 'name' in item ? item.name : 'file',
-						data: base64Data,
-						mimeType: 'type' in item ? (item.type === 'image' ? 'image/*' : item.type === 'pdf' ? 'application/pdf' : 'application/octet-stream') : 'application/octet-stream',
+						displayName: item.name,
+						data: item.data || '',
+						mimeType: item.type === 'image' ? 'image/*' : item.type === 'pdf' ? 'application/pdf' : 'application/octet-stream',
 					};
-				})),
+				}),
 			});
 
 			return ctx.json(api_response({ data: messageResponse, message: 'chat fetched successfully' }));
@@ -126,5 +111,3 @@ export class UntangleADKController {
 		}
 	};
 }
-
-

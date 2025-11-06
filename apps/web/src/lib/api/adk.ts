@@ -24,7 +24,7 @@ export class Adk {
       type: string;
       size: number;
       path?: string;
-      data: File | Blob | Buffer;
+      data: string;
     }>;
   }) {
     return this.axios.post(`${env.NEXT_PUBLIC_PLATFORM_API_URL}/api/agents/sessions`, data, {
