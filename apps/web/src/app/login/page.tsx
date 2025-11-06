@@ -2,7 +2,8 @@
 import { FaGoogle } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { useForm } from 'react-hook-form';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Router } from 'lucide-react';
 
 type LoginFormValues = {
   email: string;
@@ -11,6 +12,7 @@ type LoginFormValues = {
 
 export default function LoginPage() {
   const { handleSignin, handleGoogleSignIn, loading, error } = useAuth();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -24,6 +26,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       await handleSignin({ email: data.email, password: data.password }, sessionId);
+      router.push('/dashboard');
     } catch (err) {
       // handled in hook
     }

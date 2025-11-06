@@ -3,9 +3,30 @@
 import { Sidebar } from '@/components/sidebar/sidebar';
 import { Header } from '@/components/header';
 import { useSidebar } from '@/components/providers/sidebar-provider';
+import { useEffect } from 'react';
+import { useAuthStore } from '@/store/auth.store';
+import { useRouter } from 'next/navigation';
 
 function HomeLayoutContent({ children }: { children: React.ReactNode }) {
   const { isOpen, toggle } = useSidebar();
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    // Redirect to login if no user (after hydration attempt)
+    if (user === null) {
+      // Add a small delay to ensure hydration has completed
+      const timer = setTimeout(() => {
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser === null) {
+          // Uncomment when ready to enable redirection
+          router.push('/login');
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [user, router]);
 
   return (
     <div className="flex min-h-screen bg-[#F0F4F9]">

@@ -52,7 +52,8 @@ export function useAuth() {
     try {
       authSchema.parse(data);
       const res = await api.auth.signin(data, sessionId);
-      setUser(res.data.user);
+      setUser(res.data.data.user);
+      localStorage.setItem('token', res.data.data.token);
       return res.data;
     } catch (err: unknown) {
       const errorMessage = extractErrorMessage(err, 'Signin failed');

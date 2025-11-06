@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LayoutGrid, FileText, MessageSquare, Settings, CopyIcon, Menu } from 'lucide-react';
 import { useSidebar } from '@/components/providers/sidebar-provider';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 const navigation = [
   {
@@ -32,6 +33,7 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname();
   const { isOpen, toggle, isHydrated } = useSidebar();
+  const { user } = useAuthStore();
 
   if (!isHydrated) {
     return null;
@@ -116,7 +118,15 @@ export function Sidebar() {
             )}
           >
             <div className="h-10 w-10 rounded-full bg-[#FFCECE] flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-medium text-[#4E4B4B]">JN</span>
+              <span className="text-sm font-medium text-[#4E4B4B]">
+                <Image
+                  src="https://github.com/shadcn.png"
+                  alt="User Avatar"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              </span>
             </div>
             <div
               className={cn(
@@ -127,8 +137,8 @@ export function Sidebar() {
               )}
             >
               <div className="flex-1 min-w-0">
-                <p className="truncate text-sm font-medium text-gray-900">John</p>
-                <p className="truncate text-sm text-gray-500">j.kow@gmail.com</p>
+                <p className="truncate text-sm font-medium text-gray-900">{user?.name}</p>
+                <p className="truncate text-sm text-gray-500">{user?.email}</p>
               </div>
               <button
                 className="p-1 hover:bg-gray-100 rounded-lg transition-colors"

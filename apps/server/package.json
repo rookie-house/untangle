@@ -32,6 +32,6 @@
 		"@types/node": "^24.3.2",
 		"drizzle-kit": "^0.31.4",
 		"tsx": "^4.20.5",
-		"wrangler": "^4.36.0"
+		"wrangler": "^4.46.0"
 	}
 }
