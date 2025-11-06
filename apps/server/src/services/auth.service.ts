@@ -44,10 +44,9 @@ export class AuthService {
 			salt: ctx.env.SALT,
 		});
 
-		let phoneNumber: string | undefined;
+		let phoneNumber: string | null = null;
 		let redis: RedisClient | undefined;
 
-		
 		if (sessionId) {
 			redis = RedisClient.getInstance({
 				url: ctx.env.REDIS_URL,
@@ -61,11 +60,12 @@ export class AuthService {
 		}
 
 		// Insert new user into the database
-		const newUser = await db
-			.insert(users)
-			.values({ email, password: hashedPassword, phoneNumber: phoneNumber ?? null })
-			.returning()
-			.get();
+		const insertValues: any = { email, password: hashedPassword };
+		if (phoneNumber) {
+			insertValues.phoneNumber = phoneNumber;
+		}
+
+		const newUser = await db.insert(users).values(insertValues).returning().get();
 
 		if (!newUser) {
 			throw new Error('Failed to create user.');

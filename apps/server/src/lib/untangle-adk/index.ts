@@ -102,6 +102,45 @@ export class UntangleADK {
 		}
 	}
 
+
+	public async runAgentInlineData(params: IRunAgentParams): Promise<IResponseRunAgent> {
+		const { userId, sessionId, message, role, streaming, stateDelta, inlineFiles } = params;
+		const parts =
+			inlineFiles && inlineFiles.length > 0
+				? [
+						{ text: message },
+						...inlineFiles.map((file) => ({
+							inlineData: {
+								displayName: file.displayName,
+								data: file.data,
+								mimeType: file.mimeType,
+							},
+						})),
+					]
+				: [{ text: message }];
+
+		try {
+			const { data } = await this.axiosInstance.post('/run', {
+				appName: this._app_name,
+				userId: userId.toString(),
+				sessionId: sessionId,
+				newMessage: {
+					parts: parts,
+					role: role || 'user',
+				},
+				streaming: streaming || false,
+				stateDelta: stateDelta || {},
+			});
+			if (!data) {
+				throw new Error('No response data from UntangleADK');
+			}
+			return data;
+		} catch (error) {
+			console.error('Error in UntangleADK.runAgent:', error);
+			throw new Error(`Failed to run agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
+	}
+
 	public async deleteSession(params: IDeleteSessionParams): Promise<null> {
 		const { userId, sessionId } = params;
 		const { data } = await this.axiosInstance.delete(`/apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId.toString()}`);

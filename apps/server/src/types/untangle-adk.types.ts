@@ -20,6 +20,12 @@ export interface IFiles {
 	mimeType: string;
 }
 
+export interface IFileRaw{
+	displayName: string;
+	data: string;
+	mimeType: string;
+}
+
 export interface IRunAgentParams {
 	userId: number;
 	sessionId: string;
@@ -27,8 +33,11 @@ export interface IRunAgentParams {
 	role?: string;
 	streaming?: boolean;
 	rawFiles?: IFiles[];
+	inlineFiles?: IFileRaw[];
 	stateDelta?: Record<string, any>;
 }
+
+
 
 export interface IDeleteSessionParams {
 	userId: number;

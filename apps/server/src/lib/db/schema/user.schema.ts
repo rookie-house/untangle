@@ -21,7 +21,6 @@ export const users = sqliteTable(
 	(t) => [uniqueIndex('users_email_idx').on(t.email), index('users_name_idx').on(t.name)],
 );
 
-
 export type IUser = typeof users.$inferSelect;
 export type IPartialUser = Partial<typeof users.$inferInsert>;
 export type INewUser = typeof users.$inferInsert;
