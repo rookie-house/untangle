@@ -11,6 +11,35 @@ import type {
 	IRunAgentParams,
 } from '@/types/untangle-adk.types';
 
+// Helper: normalize inlineData so remote receives plain base64 + mime/encoding
+const normalizeInlineDataMessage = (message: any) => {
+	// Clone to avoid mutating original
+	const newMessage = { ...message };
+	if (!Array.isArray(newMessage.parts)) return newMessage;
+
+	newMessage.parts = newMessage.parts.map((part: any) => {
+		if (part && part.inlineData && typeof part.inlineData.data === 'string') {
+			// Check if data is in data URL format (data:mime/type;base64,...)
+			const match = part.inlineData.data.match(/^data:(.+);base64,(.*)$/s);
+			if (match) {
+				const [, mimeType, base64] = match;
+				return {
+					...part,
+					inlineData: {
+						displayName: part.inlineData.displayName,
+						// Send only the raw base64 payload (no "data:...;base64," prefix)
+						data: base64,
+						mimeType: mimeType || part.inlineData.mimeType,
+					},
+				};
+			}
+		}
+		return part;
+	});
+
+	return newMessage;
+};
+
 export class UntangleADK {
 	private static instance: UntangleADK;
 	private axiosInstance: AxiosInstance;
@@ -41,7 +70,7 @@ export class UntangleADK {
 		const { data } = await this.axiosInstance.get('/list-apps');
 		return data;
 	}
-	
+
 	public async getSession(params: IGetSessionParams): Promise<IResponseCreateSession> {
 		const { userId, sessionId } = params;
 		const { data } = await this.axiosInstance.get(`/apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId}`);
@@ -102,7 +131,6 @@ export class UntangleADK {
 		}
 	}
 
-
 	public async runAgentInlineData(params: IRunAgentParams): Promise<IResponseRunAgent> {
 		const { userId, sessionId, message, role, streaming, stateDelta, inlineFiles } = params;
 		const parts =
@@ -120,14 +148,17 @@ export class UntangleADK {
 				: [{ text: message }];
 
 		try {
+			// Normalize the message to strip data URL prefix from base64 data
+			const normalizedMessage = normalizeInlineDataMessage({
+				parts: parts,
+				role: role || 'user',
+			});
+
 			const { data } = await this.axiosInstance.post('/run', {
 				appName: this._app_name,
 				userId: userId.toString(),
 				sessionId: sessionId,
-				newMessage: {
-					parts: parts,
-					role: role || 'user',
-				},
+				newMessage: normalizedMessage,
 				streaming: streaming || false,
 				stateDelta: stateDelta || {},
 			});

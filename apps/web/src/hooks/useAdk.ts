@@ -31,7 +31,7 @@ interface ChatPayload {
     type: string;
     size: number;
     path?: string;
-    data: File | Blob | Buffer;
+    data: string; // Base64 string or data URL
   }>;
 }
 

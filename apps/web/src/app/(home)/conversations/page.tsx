@@ -46,7 +46,7 @@ const ConversationsPage = () => {
       name: string;
       type: string;
       size: number;
-      data: File;
+      data: string; // Changed from File to string (base64)
     }>
   >([]);
 
@@ -72,18 +72,38 @@ const ConversationsPage = () => {
     setWordCount(text.split(/\s+/).filter((word) => word.length > 0).length);
   };
 
-  const handleAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    const newFiles = Array.from(files).map((file) => ({
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      data: file,
-    }));
+    // Convert files to base64 for JSON transmission
+    const filePromises = Array.from(files).map(async (file) => {
+      return new Promise<{
+        name: string;
+        type: string;
+        size: number;
+        data: string;
+      }>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: reader.result as string, // Base64 string
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file); // Convert to base64
+      });
+    });
 
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    try {
+      const newFiles = await Promise.all(filePromises);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    } catch (error) {
+      console.error('Failed to read files:', error);
+    }
   };
 
   const handleSendMessage = async () => {

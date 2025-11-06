@@ -6,13 +6,13 @@ const fileSchema = z.object({
 	name: z.string(),
 	type: z.string(),
 	size: z.number().optional(),
-	data: z.union([z.string(), z.instanceof(Buffer), z.instanceof(File), z.instanceof(Blob)]).optional(),
+	data: z.string().optional(), // Base64 string or data URL from FileReader.readAsDataURL()
 });
 
 const firstSchema = z.object({
 	message: z.string({}).min(2, 'Message must be at least 2 characters long'),
 	sessionId: z.string().optional(),
-	img: z.union([z.array(fileSchema), z.array(z.instanceof(Buffer).or(z.instanceof(File)).or(z.instanceof(Blob)))]).optional(),
+	img: z.array(fileSchema).optional(), // Array of file objects with base64 data
 });
 
 export const firstChatValidator = zValidator('json', firstSchema, (result, ctx) => {
