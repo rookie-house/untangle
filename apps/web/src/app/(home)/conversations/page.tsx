@@ -74,6 +74,7 @@ const ConversationsPage = () => {
 
   const handleAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+
     if (!files) return;
 
     // Convert files to base64 for JSON transmission
@@ -128,7 +129,7 @@ const ConversationsPage = () => {
       }
 
       setInputValue('');
-      setUploadedFiles([]);
+      // setUploadedFiles([]);
       setWordCount(0);
     } catch (err) {
       console.error('Failed to send message:', err);
@@ -165,52 +166,6 @@ const ConversationsPage = () => {
   const removeUploadedFile = (fileName: string) => {
     setUploadedFiles((prev) => prev.filter((f) => f.name !== fileName));
   };
-
-  // Mock data for fallback display
-  const mockConversations: ConversationItem[] = [
-    {
-      id: '1',
-      title: 'The First Crucial Hours',
-      excerpt: 'With the iPhone 15 Pro... important.org/biography/item...',
-      time: '12:35',
-      isToday: true,
-    },
-    {
-      id: '2',
-      title: 'Best Practices for Developers in 2023',
-      excerpt: 'medium.com/articles/best-pra...',
-      time: '11:42',
-      isToday: true,
-    },
-    {
-      id: '3',
-      title: 'Now You Can Generate AI...',
-      excerpt: 'Images with ChatGPT: In... medium.com/ai-tools/connect...',
-      time: '3:33',
-      isToday: true,
-    },
-    {
-      id: '4',
-      title: '"My wife is dead"',
-      excerpt: 'Software update can kill AI... dev.to/software-update/2...',
-      time: '8:12',
-      isToday: false,
-    },
-    {
-      id: '5',
-      title: 'Rethinking cyber security',
-      excerpt: 'in companies...',
-      time: '2:08',
-      isToday: false,
-    },
-    {
-      id: '6',
-      title: 'How do language models',
-      excerpt: 'generate text? - About t... ai.ft.com/generate-text-ai/',
-      time: '1:36',
-      isToday: false,
-    },
-  ];
 
   // Prevent hydration mismatch by not rendering until hydrated
   if (!hydrated) {
@@ -301,89 +256,6 @@ const ConversationsPage = () => {
             </div>
           ) : (
             <div>
-              {/* Today Section */}
-              {/* <div>
-                                <h3 className="text-xs font-semibold text-gray-600 uppercase mb-2">
-                                    Today
-                                </h3>
-                                <div className="space-y-2">
-                                    {mockConversations
-                                        .filter((conv) => conv.isToday)
-                                        .map((conversation) => (
-                                            <button
-                                                key={conversation.id}
-                                                onClick={() => handleSelectConversation(conversation.id)}
-                                                className={`w-full text-left p-3 rounded-lg transition-colors ${selectedConversation === conversation.id
-                                                        ? 'bg-blue-50'
-                                                        : 'hover:bg-gray-50'
-                                                    }`}
-                                            >
-                                                <div className="flex items-start gap-2">
-                                                    <Image
-                                                        src="https://github.com/shadcn.png"
-                                                        alt="avatar"
-                                                        width={32}
-                                                        height={32}
-                                                        className="rounded-full flex-shrink-0 mt-1"
-                                                    />
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                                            {conversation.title}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            {conversation.excerpt}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 mt-1">
-                                                            {conversation.time}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                </div>
-                            </div> */}
-
-              {/* Yesterday Section */}
-              {/* <div>
-                                <h3 className="text-xs font-semibold text-gray-600 uppercase mb-2 mt-4">
-                                    Yesterday
-                                </h3>
-                                <div className="space-y-2">
-                                    {mockConversations
-                                        .filter((conv) => !conv.isToday)
-                                        .map((conversation) => (
-                                            <button
-                                                key={conversation.id}
-                                                onClick={() => handleSelectConversation(conversation.id)}
-                                                className={`w-full text-left p-3 rounded-lg transition-colors ${selectedConversation === conversation.id
-                                                        ? 'bg-blue-50'
-                                                        : 'hover:bg-gray-50'
-                                                    }`}
-                                            >
-                                                <div className="flex items-start gap-2">
-                                                    <Image
-                                                        src="https://github.com/shadcn.png"
-                                                        alt="avatar"
-                                                        width={32}
-                                                        height={32}
-                                                        className="rounded-full flex-shrink-0 mt-1"
-                                                    />
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                                            {conversation.title}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            {conversation.excerpt}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 mt-1">
-                                                            {conversation.time}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                </div> */}
-              {/* </div> */}
               <div className="text-xs font-semibold text-gray-600 uppercase mb-2">
                 Please Create a new session to start chatting.
               </div>
@@ -401,7 +273,18 @@ const ConversationsPage = () => {
             <h3 className="text-sm font-semibold text-gray-900 mb-2">Attached Document</h3>
             <p className="text-xs text-gray-500 mb-4">Display Attached Document</p>
             <div className="bg-gray-50 rounded-lg p-4 h-[90%] flex items-center justify-center">
+              {uploadedFiles.length > 0 ? (
+                <div className="w-full h-full overflow-auto">
+                  <iframe
+                    src={uploadedFiles[0].data}
+                    title={uploadedFiles[0].name}
+                    className="w-full h-full border-0"
+                  />
+                </div>
+              ) : ( 
               <MessageCircle className="w-8 h-8 text-gray-300" />
+              )
+            }
             </div>
             <div className="flex gap-2 mt-4">
               <button className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
@@ -476,10 +359,14 @@ const ConversationsPage = () => {
                   ))}
                 </div>
               )}
-
               <textarea
                 value={inputValue}
                 onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSendMessage();
+                  }
+                }}
                 placeholder="Enter Prompt Here"
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 rows={3}
