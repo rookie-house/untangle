@@ -20,6 +20,10 @@ export default function GoogleCallback() {
       callbackResponse.then((res) => {
         const token = res?.data?.token || '';
         localStorage.setItem('token', token);
+         setTimeout(() => {
+          console.log("📤 Posting token to window event:", token);
+          window.postMessage({ type: "SAVE_TO_EXTENSION", token }, "*");
+        }, 500);
         // After handling the callback, redirect to the desired page
         router.push('/dashboard'); // Change '/dashboard' to your desired route
       });

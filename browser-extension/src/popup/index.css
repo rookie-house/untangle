@@ -1,9 +1,12 @@
 :root {
-  font-family: system-ui, Arial, sans-serif;
+  /* Base light theme to align with apps/web */
+  --font-figtree: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-rubik: "Rubik", var(--font-figtree);
+  font-family: var(--font-figtree);
   line-height: 1.4;
-  color-scheme: light dark;
-  color: rgba(6, 2, 27, 0.316);
-  background-color: #242424;
+  color-scheme: light;
+  color: #030712;
+  background-color: #ffffff;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
@@ -17,10 +20,11 @@ a:hover { color: #535bf2; }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
   min-width: 320px;
   min-height: 200px;
+  background: var(--bg, #ffffff);
+  color: var(--fg, #030712);
 }
 
 h1 {
@@ -29,15 +33,16 @@ h1 {
 }
 
 button {
-  border-radius: 4px;
-  border: 1px solid transparent;
+  border-radius: 8px;
+  border: 1px solid rgba(2,6,23,0.06);
   padding: 0.5em 1em;
   font: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
+  color: #030712;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.18s, transform 0.12s;
 }
-button:hover { border-color: #646cff; }
+button:hover { border-color: rgba(16,24,40,0.08); transform: translateY(-1px); }
 button:focus { outline: 2px auto -webkit-focus-ring-color; }
 
 .card { padding: 1.5em; }
@@ -49,11 +54,7 @@ button:focus { outline: 2px auto -webkit-focus-ring-color; }
   text-align: center;
 }
 
+/* keep prefers-color-scheme light override minimal */
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover { color: #747bff; }
-  button { background-color: #f9f9f9; }
+  :root { color: #213547; background-color: #ffffff; }
 }
