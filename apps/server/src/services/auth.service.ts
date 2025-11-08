@@ -286,7 +286,6 @@ export class AuthService {
 		if (!user) {
 			throw new Error('Failed to create or update user.');
 		}
-		console.log('Upserted User:', user);
 
 		const token = await this._signToken({
 			user: { id: user.id },
