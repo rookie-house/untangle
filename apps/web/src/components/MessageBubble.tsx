@@ -12,7 +12,10 @@ interface MessageProps {
   avatar?: string;
 }
 
-const StructuredContent: React.FC<{ data: any; level?: number }> = ({ data, level = 0 }) => {
+const StructuredContent: React.FC<{
+  data: string | object | number | boolean | null;
+  level?: number;
+}> = ({ data, level = 0 }) => {
   if (typeof data === 'string') {
     try {
       const parsed = JSON.parse(data);
@@ -66,9 +69,7 @@ const MessageBubble: React.FC<MessageProps> = ({ role, content, timestamp, token
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
-    const textContent = typeof content === 'string' 
-      ? content 
-      : JSON.stringify(content, null, 2);
+    const textContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
     navigator.clipboard.writeText(textContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -82,11 +83,7 @@ const MessageBubble: React.FC<MessageProps> = ({ role, content, timestamp, token
         <div className="flex gap-3 max-w-md items-end">
           {avatar && (
             <div className="flex-shrink-0">
-              <img
-                src={avatar}
-                alt="User avatar"
-                className="w-8 h-8 rounded-full object-cover"
-              />
+              <img src={avatar} alt="User avatar" className="w-8 h-8 rounded-full object-cover" />
             </div>
           )}
           <div className="bg-blue-100 text-gray-900 rounded-2xl rounded-tr-none px-4 py-3">
