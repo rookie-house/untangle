@@ -32,6 +32,7 @@ export class UntangleADKController {
 			}
 
 			const session = await UntangleADKService.createSession({ ctx, userId: user.id });
+			
 
 			return ctx.json(api_response({ data: session, message: 'Session created successfully' }));
 		} catch (error) {
