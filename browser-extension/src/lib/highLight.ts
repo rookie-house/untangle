@@ -203,3 +203,110 @@ async function removeHighlights(): Promise<void> {
 
 export { highlightLinks, removeHighlights };
 export type { HighlightConfig, HighlightOptions };
+
+/**
+ * Highlight a list of phrases on the active tab's page.
+ * It will wrap exact phrase matches (case-insensitive) in a span with class 'untangle-phrase-highlight'.
+ */
+async function highlightPhrases(phrases: string[]): Promise<{ success: boolean; highlightedCount: number }> {
+  try {
+    if (!phrases || phrases.length === 0) return { success: true, highlightedCount: 0 };
+
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) throw new Error('No active tab found');
+
+    const res = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (phrases: string[]) => {
+        // remove previous phrase highlights
+        document.querySelectorAll('.untangle-phrase-highlight').forEach(el => {
+          const parent = el.parentNode;
+          if (parent) {
+            parent.replaceChild(document.createTextNode(el.textContent || ''), el);
+            parent.normalize();
+          }
+        });
+
+        // create style if missing
+        if (!document.getElementById('untangle-phrase-styles')) {
+          const style = document.createElement('style');
+          style.id = 'untangle-phrase-styles';
+          style.textContent = `
+            .untangle-phrase-highlight {
+              background: linear-gradient(90deg, rgba(255,240,120,0.6), rgba(255,200,80,0.6));
+              border-radius: 3px;
+              padding: 2px 3px;
+              box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
+        // simple text walker to replace phrases in text nodes (case-insensitive)
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null as any);
+        const textNodes: Text[] = [];
+        let node: Node | null = walker.nextNode();
+        while (node) {
+          if (node.nodeType === Node.TEXT_NODE && node.textContent && node.textContent.trim().length > 0) {
+            const parentEl = node.parentElement;
+            if (parentEl && !parentEl.closest('script, style, noscript, iframe')) {
+              textNodes.push(node as Text);
+            }
+          }
+          node = walker.nextNode();
+        }
+
+        const lowerPhrases = phrases.map(p => p.trim()).filter(Boolean);
+        let highlightedCount = 0;
+
+        textNodes.forEach(textNode => {
+          let text = textNode.textContent || '';
+
+          // build a combined regex to find any phrase (escape special chars)
+          const safe = lowerPhrases.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+          if (safe.length === 0) return;
+          const reg = new RegExp('(' + safe.join('|') + ')', 'ig');
+
+          if (!reg.test(text)) return;
+
+          // split and build fragment
+          const frag = document.createDocumentFragment();
+          let lastIndex = 0;
+          text.replace(reg, (match, _g1, offset) => {
+            const start = offset as number;
+            const before = text.slice(lastIndex, start);
+            if (before) frag.appendChild(document.createTextNode(before));
+
+            const span = document.createElement('span');
+            span.className = 'untangle-phrase-highlight';
+            span.textContent = match;
+            frag.appendChild(span);
+            highlightedCount++;
+            lastIndex = start + match.length;
+            return match;
+          });
+
+          const after = text.slice(lastIndex);
+          if (after) frag.appendChild(document.createTextNode(after));
+
+          if (frag.childNodes.length > 0) {
+            textNode.parentNode?.replaceChild(frag, textNode);
+          }
+        });
+
+        return { success: true, highlightedCount };
+      },
+      args: [phrases],
+    });
+
+    // executeScript returns an array of results per frame; sum highlightedCount
+    const counts = (res || []).map(r => (r && r.result && typeof r.result.highlightedCount === 'number' ? r.result.highlightedCount : 0));
+    const total = counts.reduce((a, b) => a + b, 0);
+    return { success: true, highlightedCount: total };
+  } catch (error) {
+    console.error('highlightPhrases error', error);
+    return { success: false, highlightedCount: 0 };
+  }
+}
+
+export { highlightPhrases };

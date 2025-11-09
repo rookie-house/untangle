@@ -220,6 +220,7 @@ export class AuthService {
 			throw new Error('Failed to retrieve Google tokens.');
 		}
 
+
 		const me = await google.me(tokens.access_token);
 
 		if (!me || !me.email) {
