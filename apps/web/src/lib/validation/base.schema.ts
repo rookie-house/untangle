@@ -1,13 +1,9 @@
-import { z } from "zod";
-import { checkIfBigint } from "../utils/validation";
+import { z } from 'zod';
+import { checkIfBigint } from '../utils/validation';
 
+export const id = z.coerce.string().describe('Snowflake ID');
 
-export const id = z.coerce.string().describe("Snowflake ID");
-
-export const strictId = id.refine(
-  (val) => checkIfBigint(val.trim()),
-  "Not a valid ID"
-);
+export const strictId = id.refine((val) => checkIfBigint(val.trim()), 'Not a valid ID');
 
 export type ID = z.infer<typeof id>;
 
@@ -17,20 +13,18 @@ export const ResponseSchema = z.object({
   message: z.any(),
 });
 
-export const defaultEmptyString = z.string().trim().default("");
+export const defaultEmptyString = z.string().trim().default('');
 
-export const dateString = z.coerce
-  .string()
-  .refine((val) => !isNaN(Date.parse(val)));
+export const dateString = z.coerce.string().refine((val) => !isNaN(Date.parse(val)));
 
 export const defaultDateString = dateString.default(
-  new Date().toISOString().split("T")[0] ?? new Date().toISOString()
+  new Date().toISOString().split('T')[0] ?? new Date().toISOString()
 );
 
 export const attachmentUrls = z
   .string()
-  .default("")
-  .transform((str) => str.split(",").filter((url) => url.length > 0));
+  .default('')
+  .transform((str) => str.split(',').filter((url) => url.length > 0));
 
 export const baseEntitySchema = z.object({
   id,
@@ -45,9 +39,7 @@ export type ExcludeBaseProps<
   E extends keyof T = keyof BaseEntity,
 > = Omit<T, keyof BaseEntity | E>;
 
-export const excludeBaseProps = <
-  T extends z.ZodObject<(typeof baseEntitySchema)["shape"]>,
->(
+export const excludeBaseProps = <T extends z.ZodObject<(typeof baseEntitySchema)['shape']>>(
   schema: T
 ) => {
   return schema.omit({
@@ -58,24 +50,21 @@ export const excludeBaseProps = <
 };
 
 export type StripBaseProps<
-  T extends z.ZodObject<(typeof baseEntitySchema)["shape"] & z.ZodRawShape>,
-> = Omit<T, "shape"> & {
+  T extends z.ZodObject<(typeof baseEntitySchema)['shape'] & z.ZodRawShape>,
+> = Omit<T, 'shape'> & {
   shape: Omit<
     {
-      [K in keyof T["shape"]]: T["shape"][K];
+      [K in keyof T['shape']]: T['shape'][K];
     },
     keyof BaseEntity
   >;
 };
 
 // Common CRUD operation schemas
-export const createEntitySchema = <T extends z.ZodTypeAny>(entitySchema: T) =>
-  entitySchema;
+export const createEntitySchema = <T extends z.ZodTypeAny>(entitySchema: T) => entitySchema;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const updateEntitySchema = <T extends z.ZodObject<any>>(
-  entitySchema: T
-) =>
+export const updateEntitySchema = <T extends z.ZodObject<any>>(entitySchema: T) =>
   z
     .object({
       id: strictId,
@@ -95,7 +84,7 @@ export const paginationSchema = z.object({
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().default(10),
   sort_by: z.string().optional(),
-  sort_order: z.enum(["asc", "desc"]).optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
 });
 
 export type PaginationParams = z.infer<typeof paginationSchema>;

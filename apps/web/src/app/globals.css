@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,9 +45,7 @@
 
 body {
   /* Apply Figtree globally, fall back to Geist variable and system fonts */
-  font-family:
-    var(--font-figtree, "Figtree"), var(--font-geist-sans), Arial, Helvetica,
-    sans-serif;
+  font-family: var(--font-figtree, 'Figtree'), var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -59,7 +57,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-rubik, "Rubik"), var(--font-geist-sans), sans-serif;
+  font-family: var(--font-rubik, 'Rubik'), var(--font-geist-sans), sans-serif;
   margin: 0;
 }
 
@@ -78,28 +76,28 @@ h6 {
 */
 
 .figtree-heading-400 {
-  font-family: "Figtree", sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
 }
 
 .figtree-heading-800 {
-  font-family: "Figtree", sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-optical-sizing: auto;
   font-weight: 800;
   font-style: normal;
 }
 
 .rubik-body-400 {
-  font-family: "Rubik", sans-serif;
+  font-family: 'Rubik', sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
 }
 
 .rubik-body-600 {
-  font-family: "Rubik", sans-serif;
+  font-family: 'Rubik', sans-serif;
   font-optical-sizing: auto;
   font-weight: 600;
   font-style: normal;
@@ -107,8 +105,8 @@ h6 {
 
 /* Fallback: apply Rubik or Figtree to the root variables if desired */
 :root {
-  --font-figtree: "Figtree", sans-serif;
-  --font-rubik: "Rubik", sans-serif;
+  --font-figtree: 'Figtree', sans-serif;
+  --font-rubik: 'Rubik', sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.13 0.028 261.692);
@@ -145,7 +143,7 @@ h6 {
 
 .dark {
   --background: oklch(21.033% 0.00588 285.832);
-  --foreground: oklch(0.985 0.002 247.839);
+  --foreground: oklch(57.707% 0.06781 79.372);
   --card: oklch(0.21 0.034 264.665);
   --card-foreground: oklch(0.985 0.002 247.839);
   --popover: oklch(0.21 0.034 264.665);
@@ -164,8 +162,8 @@ h6 {
   --ring: oklch(0.551 0.027 264.364);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-3: #fe9a00;
+  --chart-4: oklch(62.17% 0.25898 305.305);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.21 0.034 264.665);
   --sidebar-foreground: oklch(0.985 0.002 247.839);
@@ -183,5 +181,13 @@ h6 {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    color: #8f754a;
   }
 }

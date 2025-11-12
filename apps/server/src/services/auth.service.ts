@@ -46,31 +46,28 @@ export class AuthService {
 			salt: ctx.env.SALT,
 		});
 
-		console.log({ email: email, password: hashedPassword });
+		let phoneNumber: string | null = null;
+		let redis: RedisClient | undefined;
 
-		// let phoneNumber: string | undefined;
-		// let redis: RedisClient | undefined;
+		if (sessionId) {
+			redis = RedisClient.getInstance({
+				url: ctx.env.REDIS_URL,
+				token: ctx.env.REDIS_TOKEN,
+			});
+			const session = await redis.getSession({ sessionId });
+			if (!session || !session.phoneNumber) {
+				throw new Error('Session not found or phone number missing');
+			}
+			phoneNumber = session.phoneNumber;
+		}
 
-		// if (sessionId) {
-		// 	redis = RedisClient.getInstance({
-		// 		url: ctx.env.REDIS_URL,
-		// 		token: ctx.env.REDIS_TOKEN,
-		// 	});
-		// 	const session = await redis.getSession({ sessionId });
-		// 	if (!session || !session.phoneNumber) {
-		// 		throw new Error('Session not found or phone number missing');
-		// 	}
-		// 	phoneNumber = session.phoneNumber;
-		// }
+		// Insert new user into the database
+		const insertValues: any = { email, password: hashedPassword };
+		if (phoneNumber) {
+			insertValues.phoneNumber = phoneNumber;
+		}
 
-		const newUser = await db
-			.insert(users)
-			.values({
-				email,
-				password: hashedPassword,
-			})
-			.returning()
-			.get();
+		const newUser = await db.insert(users).values(insertValues).returning().get();
 
 		if (!newUser) {
 			throw new Error('Failed to create user.');
@@ -226,6 +223,7 @@ export class AuthService {
 		if (!tokens || !tokens.access_token) {
 			throw new Error('Failed to retrieve Google tokens.');
 		}
+
 
 		const me = await google.me(tokens.access_token);
 

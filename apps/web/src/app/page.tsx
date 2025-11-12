@@ -1,13 +1,12 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+'use client';
+import Link from 'next/link';
+import Image from 'next/image';
+// import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
+  // const router = useRouter();
   return (
     <>
-
       <main className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 px-6 pt-40 flex flex-col items-center">
         <section className="w-full max-w-5xl text-center">
           {/* Logo Image */}
@@ -25,8 +24,8 @@ export default function Home() {
             Cut Through Legal Jargon with Clarity
           </h1>
           <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Untangle turns complex legal documents into plain-language insights. 
-            See the key clauses, risks, and obligations — no legal degree required.
+            Untangle turns complex legal documents into plain-language insights. See the key
+            clauses, risks, and obligations — no legal degree required.
           </p>
 
           {/* Split Layout Section */}
@@ -41,35 +40,29 @@ export default function Home() {
                   width={288}
                   height={288}
                   className="object-cover"
-                /> 
+                />
               </div>
             </div>
 
             {/* Right Side - Feature Highlights */}
             <div className="flex-1 space-y-6 text-left">
               <div>
-                <h3 className="text-xl font-semibold text-gray-100 mb-1">
-                  📜 Agreement Analysis
-                </h3>
+                <h3 className="text-xl font-semibold text-gray-100 mb-1">📜 Agreement Analysis</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Automatically scan and detect hidden clauses, policies, and obligations 
-                  in seconds.
+                  Automatically scan and detect hidden clauses, policies, and obligations in
+                  seconds.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-100 mb-1">
-                  💡 Clear Insights
-                </h3>
+                <h3 className="text-xl font-semibold text-gray-100 mb-1">💡 Clear Insights</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
                   Get clear, actionable summaries that help you make informed decisions faster.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-100 mb-1">
-                  🤝 Team Collaboration
-                </h3>
+                <h3 className="text-xl font-semibold text-gray-100 mb-1">🤝 Team Collaboration</h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
                   Share documents, leave comments, and work with your team in real-time.
                 </p>

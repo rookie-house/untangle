@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function FloatingHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,31 +11,31 @@ export default function FloatingHeader() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Show/hide based on scroll direction
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
       }
-      
+
       // Background blur effect
       setIsScrolled(currentScrollY > 50);
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
   return (
     <header
       className={`fixed top-4 right-4 z-50 transition-all duration-500 ${
-        isVisible ? "translate-y-0 opacity-100" : "-translate-y-20 opacity-0"
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'
       } ${
-        isScrolled 
-          ? "bg-gray-900/95 backdrop-blur-lg shadow-2xl scale-95 border-purple-500/20" 
-          : "bg-gray-900/80 backdrop-blur-md shadow-xl border-gray-700/50"
+        isScrolled
+          ? 'bg-gray-900/95 backdrop-blur-lg shadow-2xl scale-95 border-purple-500/20'
+          : 'bg-gray-900/80 backdrop-blur-md shadow-xl border-gray-700/50'
       } rounded-2xl border`}
     >
       <div className="flex items-center space-x-2 sm:space-x-3 px-4 py-3">

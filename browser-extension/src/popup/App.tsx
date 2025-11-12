@@ -48,7 +48,7 @@ export default function App() {
   };
 
   const handleLogin = () => {
-    const loginUrl = "https://untangle.rookie.house/";
+    const loginUrl = "http://localhost:3000";
     chrome.tabs.create({ url: loginUrl });
   };
 
@@ -93,12 +93,16 @@ export default function App() {
 
       <div className="actions-container">
         <button onClick={handleDemystify} className="action-btn primary-btn">
-          <Sparkles size={18} />
-          <span>Demystify</span>
+          <span className="btn-content">
+            <Sparkles size={18} />
+            <span className="btn-label">Demystify</span>
+          </span>
         </button>
         <button onClick={handleScreenshot} className="action-btn secondary-btn">
-          <Camera size={18} />
-          <span>Screenshot</span>
+          <span className="btn-content">
+            <Camera size={18} />
+            <span className="btn-label">Screenshot</span>
+          </span>
         </button>
       </div>
 

@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+.git
+.cache
+.DS_Store
+*.log
+.env*.local
+public

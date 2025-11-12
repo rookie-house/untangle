@@ -62,13 +62,21 @@ export class UntangleADKController {
 				userId: user.id,
 				message: body.message,
 				sessionId: body.sessionId,
-				rawFiles:
-					body.img?.map((item) => ({
-						key: item.key,
-						displayName: item.title,
-						fileUri: item.url,
+				// rawFiles:
+				// 	body.img?.map((item) => ({
+				// 		key: item.key,
+				// 		displayName: item.title,
+				// 		fileUri: item.url,
+				// 		mimeType: item.type === 'image' ? 'image/*' : item.type === 'pdf' ? 'application/pdf' : 'application/octet-stream',
+				// 	})) || [],
+
+				inlineFiles: (body.img || []).map((item) => {
+					return {
+						displayName: item.name,
+						data: item.data || '',
 						mimeType: item.type === 'image' ? 'image/*' : item.type === 'pdf' ? 'application/pdf' : 'application/octet-stream',
-					})) || [],
+					};
+				}),
 			});
 
 			return ctx.json(api_response({ data: messageResponse, message: 'chat fetched successfully' }));
