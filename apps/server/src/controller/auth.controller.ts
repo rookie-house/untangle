@@ -71,7 +71,6 @@ export class AuthController {
 					400,
 				);
 			}
-
 			const user = await AuthService.googleCallback({ ctx, code, state });
 			return ctx.json(api_response({ message: 'User signed in', data: user }));
 		} catch (error) {
@@ -89,7 +88,6 @@ export class AuthController {
 		try {
 			// @ts-ignore
 			const { phoneNumber }: PhoneValidator = ctx.req.valid('json');
-
 			const { url } = await AuthService.getWhatsAppAuthLink({ ctx, phoneNumber });
 			return ctx.json(api_response({ message: 'Auth link generated', data: { url }, is_error: false }), 200);
 		} catch (error) {
@@ -106,11 +104,9 @@ export class AuthController {
 	public static readonly ping = async (ctx: Context) => {
 		try {
 			const user = ctx.get('user') as IUserContext;
-
 			if (!user) {
 				return ctx.json(api_response({ message: 'Unauthorized', is_error: true }), 401);
 			}
-
 			return ctx.json(api_response({ message: 'user fetched successfully', data: user, is_error: false }), 200);
 		} catch (error) {
 			return ctx.json(

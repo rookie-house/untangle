@@ -1,17 +1,18 @@
 {
-  "name": "whatsapp-bot",
-  "type": "module",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
-  },
-  "dependencies": {
-    "@upstash/redis": "^1.35.3",
-    "hono": "^4.9.8"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250913.0",
-    "wrangler": "^4.4.0"
-  }
+	"name": "whatsapp-bot",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"build": "tsc -p .",
+		"deploy": "wrangler deploy --minify",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
+	},
+	"dependencies": {
+		"@upstash/redis": "^1.35.3",
+		"hono": "^4.9.8"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250913.0",
+		"wrangler": "^4.4.0"
+	}
 }

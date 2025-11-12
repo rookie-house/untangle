@@ -9,7 +9,7 @@ const app = hono();
 app.use(logger());
 app.use('*', async (c, next) => {
 	const corsMiddleware = cors({
-		origin: ['http://localhost:3000', 'https://untangle.rookie.house'],
+		origin: ['http://localhost:3000', 'https://untangle.rookie.house', 'https://uniquely-generous-skylark.ngrok-free.app'],
 		allowMethods: ['GET', 'POST', 'PUT', 'DELETE', "OPTIONS"],
 		allowHeaders: ['Content-Type', 'Authorization'],
 		credentials: true,

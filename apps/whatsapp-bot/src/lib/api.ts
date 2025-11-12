@@ -1,9 +1,13 @@
 import axios from "axios";
+import type { Context } from "hono";
 
-export async function getAuthLink(phoneNumber: string): Promise<any> {
+export async function getAuthLink(
+	phoneNumber: string,
+	ctx: Context
+): Promise<{ url: string }> {
 	try {
 		const { data } = await axios.post(
-			"https://untangled-api.rookie.house/api/auth/whatsapp/start",
+			`${ctx.env.BACKEND_URL}/api/auth/whatsapp/start`,
 			{
 				phoneNumber,
 			},
@@ -14,7 +18,7 @@ export async function getAuthLink(phoneNumber: string): Promise<any> {
 		if (!data) {
 			throw new Error("No response data from getAuthLink");
 		}
-		return data;
+		return data.data;
 	} catch (error: any) {
 		console.error("Error in getAuthLink:", error);
 		throw new Error(
@@ -23,10 +27,10 @@ export async function getAuthLink(phoneNumber: string): Promise<any> {
 	}
 }
 
-export async function getADKSession(token: string): Promise<any> {
+export async function getADKSession(token: string, ctx: Context): Promise<any> {
 	try {
 		const { data } = await axios.get(
-			"https://untangled-api.rookie.house/api/agents/session",
+			`${ctx.env.BACKEND_URL}/api/agents/session`,
 			{
 				headers: {
 					"Content-Type": "application/json",
@@ -46,13 +50,17 @@ export async function getADKSession(token: string): Promise<any> {
 	}
 }
 
-export async function uploadDocument(file: File, token: string): Promise<any> {
+export async function uploadDocument(
+	file: File,
+	token: string,
+	ctx: Context
+): Promise<any> {
 	try {
 		const formData = new FormData();
 		formData.append("file", file);
 
 		const { data } = await axios.put(
-			"https://untangled-api.rookie.house/api/documents/upload",
+			`${ctx.env.BACKEND_URL}/api/documents/upload`,
 			formData,
 			{
 				headers: { Authorization: `Bearer ${token}` },
@@ -72,14 +80,15 @@ export async function uploadDocument(file: File, token: string): Promise<any> {
 
 export async function chatWithADKSession(
 	payload: ChatSessionPayload,
-	token: string
+	token: string,
+	ctx: Context
 ): Promise<any> {
 	if (!payload.message || payload.message.length < 2) {
 		throw new Error("Message must be at least 2 characters long.");
 	}
 	try {
 		const { data } = await axios.post(
-			"https://untangled-api.rookie.house/api/agents/session",
+			`${ctx.env.BACKEND_URL}/api/agents/session`,
 			payload,
 			{
 				headers: {
