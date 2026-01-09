@@ -14,7 +14,7 @@ class API {
   adk: Adk;
 
   constructor() {
-    this._axios = this.createAxios(env.NEXT_PUBLIC_PLATFORM_API_URL);
+    this._axios = this.createAxios(env.NEXT_PUBLIC_PLATFORM_API_URL + '/api');
     this.auth = new Auth(this._axios);
     this.documents = new Documents(this._axios);
     this.categories = new Categories(this._axios);

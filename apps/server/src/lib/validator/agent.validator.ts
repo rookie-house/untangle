@@ -12,6 +12,7 @@ const fileSchema = z.object({
 const firstSchema = z.object({
 	message: z.string({}).min(2, 'Message must be at least 2 characters long'),
 	sessionId: z.string().optional(),
+	documentId: z.string().optional(),
 	img: z.array(fileSchema).optional(), // Array of file objects with base64 data
 });
 

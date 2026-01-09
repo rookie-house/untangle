@@ -5,22 +5,23 @@ import { Send, Paperclip, RotateCcw, Copy, MessageCircle, Trash2 } from 'lucide-
 import Image from 'next/image';
 import { useAdk } from '@/hooks/useAdk';
 import MessageBubble from '@/components/MessageBubble';
+import { useDocuments } from '@/hooks/useDocuments';
 
-interface ConversationItem {
-  id: string;
-  title: string;
-  excerpt: string;
-  time: string;
-  avatar?: string;
-  isToday?: boolean;
-}
+// interface ConversationItem {
+//   id: string;
+//   title: string;
+//   excerpt: string;
+//   time: string;
+//   avatar?: string;
+//   isToday?: boolean;
+// }
 
-interface Message {
-  id: string;
-  role: 'user' | 'model';
-  content: string;
-  timestamp: string;
-}
+// interface Message {
+//   id: string;
+//   role: 'user' | 'model';
+//   content: string;
+//   timestamp: string;
+// }
 
 const ConversationsPage = () => {
   // Initialize useAdk hook
@@ -34,13 +35,15 @@ const ConversationsPage = () => {
     handleStartChat,
     handleDeleteSession,
     clearMessages,
-    clearError,
+    // clearError,
   } = useAdk();
+  const { uploadDocument } = useDocuments();
 
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [wordCount, setWordCount] = useState(0);
   const [hydrated, setHydrated] = useState(false);
+  const [documentId, setDocumentId] = useState<number | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<
     Array<{
       name: string;
@@ -62,9 +65,7 @@ const ConversationsPage = () => {
     }
   }, [hydrated, handleGetSessions]);
 
-  useEffect(() => {
-    console.log('Message Content', messages);
-  }, [messages]);
+  useEffect(() => {}, [messages]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -79,6 +80,8 @@ const ConversationsPage = () => {
 
     // Convert files to base64 for JSON transmission
     const filePromises = Array.from(files).map(async (file) => {
+      const res = await uploadDocument(file);
+      setDocumentId(res.document.id);
       return new Promise<{
         name: string;
         type: string;
@@ -113,17 +116,16 @@ const ConversationsPage = () => {
     try {
       // If no session selected, create a new one first
       if (!selectedConversation) {
-        const newSession = await handleCreateSession();
-        setSelectedConversation(newSession.id);
-        await handleStartChat({
+        const res = await handleStartChat({
           message: inputValue,
-          sessionId: newSession.id,
-          img: uploadedFiles,
+          documentId: documentId || undefined,
         });
+        setSelectedConversation(res.sessionId);
       } else {
         await handleStartChat({
           message: inputValue,
           sessionId: selectedConversation,
+          documentId: documentId || undefined,
           img: uploadedFiles,
         });
       }
@@ -131,6 +133,7 @@ const ConversationsPage = () => {
       setInputValue('');
       // setUploadedFiles([]);
       setWordCount(0);
+      setDocumentId(null); // Reset documentId after use
     } catch (err) {
       console.error('Failed to send message:', err);
     }
@@ -141,6 +144,8 @@ const ConversationsPage = () => {
       const newSession = await handleCreateSession();
       setSelectedConversation(newSession.id);
       clearMessages();
+      setDocumentId(null); // Reset documentId for new session
+      setUploadedFiles([]); // Reset uploaded files for new session
     } catch (err) {
       console.error('Failed to create session:', err);
     }
@@ -149,19 +154,21 @@ const ConversationsPage = () => {
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversation(conversationId);
     clearMessages();
+    setDocumentId(null); // Reset documentId when switching conversations
+    setUploadedFiles([]); // Reset uploaded files when switching conversations
   };
 
-  const handleDelete = async (sessionId: string) => {
-    try {
-      await handleDeleteSession(sessionId);
-      if (selectedConversation === sessionId) {
-        setSelectedConversation(null);
-        clearMessages();
-      }
-    } catch (err) {
-      console.error('Failed to delete session:', err);
-    }
-  };
+  // const handleDelete = async (sessionId: string) => {
+  //   try {
+  //     await handleDeleteSession(sessionId);
+  //     if (selectedConversation === sessionId) {
+  //       setSelectedConversation(null);
+  //       clearMessages();
+  //     }
+  //   } catch (err) {
+  //     console.error('Failed to delete session:', err);
+  //   }
+  // };
 
   const removeUploadedFile = (fileName: string) => {
     setUploadedFiles((prev) => prev.filter((f) => f.name !== fileName));
@@ -281,10 +288,9 @@ const ConversationsPage = () => {
                     className="w-full h-full border-0"
                   />
                 </div>
-              ) : ( 
-              <MessageCircle className="w-8 h-8 text-gray-300" />
-              )
-            }
+              ) : (
+                <MessageCircle className="w-8 h-8 text-gray-300" />
+              )}
             </div>
             <div className="flex gap-2 mt-4">
               <button className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">

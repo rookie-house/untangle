@@ -1,6 +1,7 @@
 import { documents, sessions } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import { UntangleADK } from '@/lib/untangle-adk';
+import { getMimeTypeFromCategory } from '@/lib/utils/mimetype';
 import { parseAdkResponse, removeSpecialCharacters } from '@/lib/utils/parse';
 import { WorkerAI } from '@/lib/worker-ai';
 import type { IFileRaw, IFiles } from '@/types/untangle-adk.types';
@@ -21,6 +22,14 @@ export class UntangleADKService {
 		}
 
 		return sessions;
+	};
+
+	public static readonly getSession = async({ ctx, userId, sessionId }: { ctx: Context; userId: number; sessionId: string }) => {
+		const session = await UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API }).getSession({ userId, sessionId });
+		if (!session) {
+			throw new Error('failed to fetch session');
+		}
+		return session;
 	};
 
 	public static readonly createSession = async ({ ctx, userId }: { ctx: Context; userId: number }) => {
@@ -48,6 +57,7 @@ export class UntangleADKService {
 		message,
 		// rawFiles,
 		inlineFiles,
+		documentId,
 		sessionId,
 	}: {
 		ctx: Context;
@@ -55,12 +65,7 @@ export class UntangleADKService {
 		userId: number;
 		message: string;
 		sessionId?: string;
-		// rawFiles?: {
-		// 	key: string;
-		// 	displayName: string;
-		// 	fileUri: string;
-		// 	mimeType: string;
-		// }[];
+		documentId?: string;
 		inlineFiles?: IFileRaw[];
 	}) => {
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
@@ -80,7 +85,28 @@ export class UntangleADKService {
 			}
 		}
 
-		await db.insert(sessions).values({ id: sessionId, title: 'New Session', userId }).onConflictDoNothing();
+		const data = await db.transaction(async (tx) => {
+			await tx.insert(sessions).values({ id: sessionId, title: 'New Session', userId }).onConflictDoNothing();
+			if (!documentId) {
+				return null;
+			}
+			const documentRecord = await tx
+				.update(documents)
+				.set({ sessionId })
+				.where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+				.returning()
+				.get();
+
+			if (!documentRecord) {
+				throw new Error('Document not found or does not belong to the user');
+			}
+			return documentRecord;
+		});
+		
+		let fileData;
+		if (data) {
+			fileData = await this._downloadFile(data.url);
+		}
 
 		let files: IFileRaw[] = [];
 
@@ -110,6 +136,17 @@ export class UntangleADKService {
 			}));
 		}
 
+		if (fileData) {
+			const downloadedFile = {
+				displayName: data?.title || 'document',
+				data: Buffer.from(await fileData.arrayBuffer()).toString('base64'),
+				mimeType: getMimeTypeFromCategory(data?.type || 'other'),
+			};
+			// Merge any existing files (from inlineFiles) with the downloaded document
+			files = [...(files || []), downloadedFile];
+		}
+
+
 		try {
 			const response = await adk.runAgentInlineData({
 				userId,
@@ -136,7 +173,12 @@ export class UntangleADKService {
 				.set({ title: session_name })
 				.where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)));
 
-			return response;
+			return {
+				session: {
+					id: sessionId,
+				},
+				response: response
+			};
 		} catch (error) {
 			console.error('Error in UntangleADKService.start:', error);
 			throw new Error(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -169,5 +211,13 @@ export class UntangleADKService {
 
 		await db.delete(sessions).where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)));
 		return result;
+	};
+
+	private static _downloadFile = async (r2Url: string) => {
+		const res = await fetch(r2Url);
+		if (!res.ok) {
+			throw new Error(`Failed to download file from R2: ${res.statusText}`);
+		}
+		return res;
 	};
 }

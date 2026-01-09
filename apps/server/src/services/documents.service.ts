@@ -45,7 +45,7 @@ export class DocumentsService {
 				title: fileName,
 				type: type,
 			})
-			.returning();
+			.returning().get();
 
 		if (!document) {
 			throw new Error('Document record creation failed');

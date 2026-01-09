@@ -43,7 +43,7 @@ const normalizeInlineDataMessage = (message: any) => {
 export class UntangleADK {
 	private static instance: UntangleADK;
 	private axiosInstance: AxiosInstance;
-	private _app_name = 'untangle-adk';
+	private _app_name = 'untangle_agent';
 	private constructor(
 		private config: {
 			api: string;
@@ -153,7 +153,6 @@ export class UntangleADK {
 				parts: parts,
 				role: role || 'user',
 			});
-
 			const { data } = await this.axiosInstance.post('/run', {
 				appName: this._app_name,
 				userId: userId.toString(),
@@ -166,9 +165,19 @@ export class UntangleADK {
 				throw new Error('No response data from UntangleADK');
 			}
 			return data;
-		} catch (error) {
-			console.error('Error in UntangleADK.runAgent:', error);
-			throw new Error(`Failed to run agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		} catch (error: any) {
+			console.error('Error in UntangleADK.runAgentInlineData:', {
+				message: error.message,
+				status: error.response?.status,
+				statusText: error.response?.statusText,
+				data: error.response?.data,
+				config: {
+					url: error.config?.url,
+					baseURL: error.config?.baseURL,
+				},
+			});
+			const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || 'Unknown error';
+			throw new Error(`Failed to run agent: ${errorMessage} (Status: ${error.response?.status || 'unknown'})`);
 		}
 	}
 
