@@ -1,6 +1,7 @@
 import { documents, sessions } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import { UntangleADK } from '@/lib/untangle-adk';
+import { parseMimeType } from '@/lib/utils/mimetype';
 import { parseAdkResponse, removeSpecialCharacters } from '@/lib/utils/parse';
 import { WorkerAI } from '@/lib/worker-ai';
 import type { IFileRaw, IFiles } from '@/types/untangle-adk.types';
@@ -21,6 +22,14 @@ export class UntangleADKService {
 		}
 
 		return sessions;
+	};
+
+	public static readonly getSession = async({ ctx, userId, sessionId }: { ctx: Context; userId: number; sessionId: string }) => {
+		const session = await UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API }).getSession({ userId, sessionId });
+		if (!session) {
+			throw new Error('failed to fetch session');
+		}
+		return session;
 	};
 
 	public static readonly createSession = async ({ ctx, userId }: { ctx: Context; userId: number }) => {
@@ -60,10 +69,8 @@ export class UntangleADKService {
 		inlineFiles?: IFileRaw[];
 	}) => {
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
-		console.log("agent-url:", ctx.env.UNTANGLE_ADK_API)
 		if (!sessionId) {
 			sessionId = crypto.randomUUID();
-			console.log("create because not exists: ",sessionId)
 			const session = await adk.createSession({ sessionId, userId });
 			if (!session) {
 				throw new Error('Failed to create new session');
@@ -83,18 +90,22 @@ export class UntangleADKService {
 			if (!documentId) {
 				return null;
 			}
-			const data = await tx
+			const documentRecord = await tx
 				.update(documents)
 				.set({ sessionId })
 				.where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
 				.returning()
 				.get();
-			return data?.url;
-		});
 
+			if (!documentRecord) {
+				throw new Error('Document not found or does not belong to the user');
+			}
+			return documentRecord;
+		});
+		
 		let fileData;
 		if (data) {
-			fileData = await this._downloadFile(data);
+			fileData = await this._downloadFile(data.url);
 		}
 
 		let files: IFileRaw[] = [];
@@ -126,18 +137,15 @@ export class UntangleADKService {
 		}
 
 		if (fileData) {
-			inlineFiles = [
-				{
-					displayName: 'document',
-					data: Buffer.from(await fileData.arrayBuffer()).toString('base64'),
-					mimeType: 'application/pdf',
-				},
-			];
+			const downloadedFile = {
+				displayName: 'document',
+				data: Buffer.from(await fileData.arrayBuffer()).toString('base64'),
+				mimeType: parseMimeType(data?.type || 'other'),
+			};
+			// Merge any existing files (from inlineFiles) with the downloaded document
+			files = [...(files || []), downloadedFile];
 		}
 
-		files = inlineFiles || [];
-
-		console.log('Files to be sent to ADK:', files);
 
 		try {
 			const response = await adk.runAgentInlineData({
@@ -165,7 +173,12 @@ export class UntangleADKService {
 				.set({ title: session_name })
 				.where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)));
 
-			return response;
+			return {
+				session: {
+					id: sessionId,
+				},
+				response: response
+			};
 		} catch (error) {
 			console.error('Error in UntangleADKService.start:', error);
 			throw new Error(`Failed to start agent: ${error instanceof Error ? error.message : 'Unknown error'}`);

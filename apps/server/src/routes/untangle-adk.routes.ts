@@ -5,6 +5,7 @@ import { firstChatValidator } from '@/lib/validator/agent.validator';
 const app = hono();
 
 app.get('/sessions', UntangleADKController.getSessions);
+app.get('/sessions/:id', UntangleADKController.getSession);
 app.post('/sessions', firstChatValidator, UntangleADKController.start); 
 // app.post('/document', firstChatValidator, UntangleADKController.start); 
 app.post('/create-sessions', UntangleADKController.createSession);

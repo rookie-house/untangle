@@ -79,8 +79,6 @@ export class UntangleADK {
 
 	public async createSession(params: ICreateSessionParams): Promise<IResponseCreateSession> {
 		const { userId, sessionId } = params;
-		console.log('create: ', sessionId);
-		console.log(params)
 		const { data } = await this.axiosInstance.post(`/apps/${this._app_name}/users/${userId.toString()}/sessions/${sessionId}`, {
 			userId,
 		});
@@ -155,7 +153,6 @@ export class UntangleADK {
 				parts: parts,
 				role: role || 'user',
 			});
-			console.log('run: ', sessionId);
 			const { data } = await this.axiosInstance.post('/run', {
 				appName: this._app_name,
 				userId: userId.toString(),

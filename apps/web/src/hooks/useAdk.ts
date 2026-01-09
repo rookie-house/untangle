@@ -26,6 +26,7 @@ export interface Message {
 interface ChatPayload {
   message: string;
   sessionId?: string;
+  documentId?: number;
   img?: Array<{
     name: string;
     type: string;
@@ -106,7 +107,7 @@ export function useAdk() {
       };
 
       // Step 3: Parse ADK response (contains model responses with role: 'model')
-      const parsedMessages = parseADKResponse(response);
+      const parsedMessages = parseADKResponse(response.response);
 
       // Step 4: Add both user and model messages to state
       // Order: User message first, then all model responses
@@ -116,7 +117,10 @@ export function useAdk() {
         ...parsedMessages, // ← Model responses (role: 'model')
       ]);
 
-      return response;
+      return {
+        sessionId: response.session.id,
+        response: response.response
+      };
     } catch (err: unknown) {
       const errorMessage = extractErrorMessage(err, 'Failed to start chat');
       setError(errorMessage);
