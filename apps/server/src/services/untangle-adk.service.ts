@@ -1,7 +1,7 @@
 import { documents, sessions } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import { UntangleADK } from '@/lib/untangle-adk';
-import { parseMimeType } from '@/lib/utils/mimetype';
+import { getMimeTypeFromCategory } from '@/lib/utils/mimetype';
 import { parseAdkResponse, removeSpecialCharacters } from '@/lib/utils/parse';
 import { WorkerAI } from '@/lib/worker-ai';
 import type { IFileRaw, IFiles } from '@/types/untangle-adk.types';
@@ -138,9 +138,9 @@ export class UntangleADKService {
 
 		if (fileData) {
 			const downloadedFile = {
-				displayName: 'document',
+				displayName: data?.title || 'document',
 				data: Buffer.from(await fileData.arrayBuffer()).toString('base64'),
-				mimeType: parseMimeType(data?.type || 'other'),
+				mimeType: getMimeTypeFromCategory(data?.type || 'other'),
 			};
 			// Merge any existing files (from inlineFiles) with the downloaded document
 			files = [...(files || []), downloadedFile];

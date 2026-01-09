@@ -65,8 +65,7 @@ const ConversationsPage = () => {
     }
   }, [hydrated, handleGetSessions]);
 
-  useEffect(() => {
-  }, [messages]);
+  useEffect(() => {}, [messages]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -78,7 +77,7 @@ const ConversationsPage = () => {
     const files = e.target.files;
 
     if (!files) return;
-    
+
     // Convert files to base64 for JSON transmission
     const filePromises = Array.from(files).map(async (file) => {
       const res = await uploadDocument(file);
@@ -102,7 +101,7 @@ const ConversationsPage = () => {
         reader.readAsDataURL(file); // Convert to base64
       });
     });
-    
+
     try {
       const newFiles = await Promise.all(filePromises);
       setUploadedFiles((prev) => [...prev, ...newFiles]);
@@ -134,6 +133,7 @@ const ConversationsPage = () => {
       setInputValue('');
       // setUploadedFiles([]);
       setWordCount(0);
+      setDocumentId(null); // Reset documentId after use
     } catch (err) {
       console.error('Failed to send message:', err);
     }
@@ -144,6 +144,8 @@ const ConversationsPage = () => {
       const newSession = await handleCreateSession();
       setSelectedConversation(newSession.id);
       clearMessages();
+      setDocumentId(null); // Reset documentId for new session
+      setUploadedFiles([]); // Reset uploaded files for new session
     } catch (err) {
       console.error('Failed to create session:', err);
     }
@@ -152,6 +154,8 @@ const ConversationsPage = () => {
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversation(conversationId);
     clearMessages();
+    setDocumentId(null); // Reset documentId when switching conversations
+    setUploadedFiles([]); // Reset uploaded files when switching conversations
   };
 
   // const handleDelete = async (sessionId: string) => {
@@ -284,10 +288,9 @@ const ConversationsPage = () => {
                     className="w-full h-full border-0"
                   />
                 </div>
-              ) : ( 
-              <MessageCircle className="w-8 h-8 text-gray-300" />
-              )
-            }
+              ) : (
+                <MessageCircle className="w-8 h-8 text-gray-300" />
+              )}
             </div>
             <div className="flex gap-2 mt-4">
               <button className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
