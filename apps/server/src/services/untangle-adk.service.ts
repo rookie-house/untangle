@@ -48,6 +48,7 @@ export class UntangleADKService {
 		message,
 		// rawFiles,
 		inlineFiles,
+		documentId,
 		sessionId,
 	}: {
 		ctx: Context;
@@ -55,17 +56,14 @@ export class UntangleADKService {
 		userId: number;
 		message: string;
 		sessionId?: string;
-		// rawFiles?: {
-		// 	key: string;
-		// 	displayName: string;
-		// 	fileUri: string;
-		// 	mimeType: string;
-		// }[];
+		documentId?: string;
 		inlineFiles?: IFileRaw[];
 	}) => {
 		const adk = UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API });
+		console.log("agent-url:", ctx.env.UNTANGLE_ADK_API)
 		if (!sessionId) {
 			sessionId = crypto.randomUUID();
+			console.log("create because not exists: ",sessionId)
 			const session = await adk.createSession({ sessionId, userId });
 			if (!session) {
 				throw new Error('Failed to create new session');
@@ -80,7 +78,24 @@ export class UntangleADKService {
 			}
 		}
 
-		await db.insert(sessions).values({ id: sessionId, title: 'New Session', userId }).onConflictDoNothing();
+		const data = await db.transaction(async (tx) => {
+			await tx.insert(sessions).values({ id: sessionId, title: 'New Session', userId }).onConflictDoNothing();
+			if (!documentId) {
+				return null;
+			}
+			const data = await tx
+				.update(documents)
+				.set({ sessionId })
+				.where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+				.returning()
+				.get();
+			return data?.url;
+		});
+
+		let fileData;
+		if (data) {
+			fileData = await this._downloadFile(data);
+		}
 
 		let files: IFileRaw[] = [];
 
@@ -109,6 +124,20 @@ export class UntangleADKService {
 				mimeType: file.mimeType,
 			}));
 		}
+
+		if (fileData) {
+			inlineFiles = [
+				{
+					displayName: 'document',
+					data: Buffer.from(await fileData.arrayBuffer()).toString('base64'),
+					mimeType: 'application/pdf',
+				},
+			];
+		}
+
+		files = inlineFiles || [];
+
+		console.log('Files to be sent to ADK:', files);
 
 		try {
 			const response = await adk.runAgentInlineData({
@@ -169,5 +198,13 @@ export class UntangleADKService {
 
 		await db.delete(sessions).where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)));
 		return result;
+	};
+
+	private static _downloadFile = async (r2Url: string) => {
+		const res = await fetch(r2Url);
+		if (!res.ok) {
+			throw new Error(`Failed to download file from R2: ${res.statusText}`);
+		}
+		return res;
 	};
 }

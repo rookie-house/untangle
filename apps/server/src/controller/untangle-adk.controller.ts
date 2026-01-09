@@ -62,6 +62,7 @@ export class UntangleADKController {
 				userId: user.id,
 				message: body.message,
 				sessionId: body.sessionId,
+				documentId: body.documentId,
 				// rawFiles:
 				// 	body.img?.map((item) => ({
 				// 		key: item.key,
@@ -81,9 +82,11 @@ export class UntangleADKController {
 
 			return ctx.json(api_response({ data: messageResponse, message: 'chat fetched successfully' }));
 		} catch (error) {
+			console.error('Error in UntangleADKController.start:', error);
 			if (error instanceof Error) {
 				return ctx.json(api_response({ message: error.message, is_error: true }), 500);
 			}
+			return ctx.json(api_response({ message: 'An unknown error occurred', is_error: true }), 500);
 		}
 	};
 
