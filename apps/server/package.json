@@ -18,6 +18,7 @@
 	"dependencies": {
 		"@hono/zod-validator": "^0.7.2",
 		"@libsql/client": "^0.15.15",
+		"@scalar/hono-api-reference": "^0.9.32",
 		"@upstash/redis": "^1.35.3",
 		"axios": "^1.12.1",
 		"bcryptjs": "^3.0.2",
