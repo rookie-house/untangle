@@ -10,8 +10,6 @@ on:
 
 jobs:
   deploy:
-    needs: changes
-    if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,16 +28,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Generate and run migrations
-        if: needs.changes.outputs.migrations == 'true'
-        run: |
-          echo "Migration files changed, running migrations..."
-          pnpm drizzle:generate
-          pnpm drizzle:migrate
-        env:
-          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
 
       - name: Generate wrangler.jsonc
         run: |
