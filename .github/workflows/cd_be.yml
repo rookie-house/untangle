@@ -9,44 +9,6 @@ on:
       - ".github/workflows/cd_be.yml"
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      server: ${{ steps.changes.outputs.server }}
-      migrations: ${{ steps.changes.outputs.migrations }}
-    steps:
-      - name: Checkout for changes
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # fetch full history so git diff works reliably
-
-      - name: Check for changes
-        id: changes
-        run: |
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
-
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-
-          # Check if server files changed
-          if echo "$CHANGED_FILES" | grep -E '^apps/server/(src/|package\.json|wrangler\.|pnpm-lock\.yaml)'; then
-            echo "server=true" >> $GITHUB_OUTPUT
-          else
-            echo "server=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Check if migration files changed
-          if echo "$CHANGED_FILES" | grep -E '^apps/server/(drizzle/|migrations/|.*\.sql)'; then
-            echo "migrations=true" >> $GITHUB_OUTPUT
-          else
-            echo "migrations=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Debug outputs
-        run: |
-          echo "Server change detected: ${{ steps.changes.outputs.server }}"
-          echo "Migrations change detected: ${{ steps.changes.outputs.migrations }}"
-
   deploy:
     needs: changes
     if: needs.changes.outputs.server == 'true'
