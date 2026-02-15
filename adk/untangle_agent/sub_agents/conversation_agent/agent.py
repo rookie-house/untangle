@@ -1,8 +1,14 @@
 from google.adk.agents import LlmAgent
 from .tools.get_user_data import get_user_data
+from google.adk.models.lite_llm import LiteLlm
 
 conversation_agent = LlmAgent(
-    model='gemini-2.5-flash',
+     model=LiteLlm(
+        model="gpt-4o-mini",
+        response_format={"type": "text"},
+        force_json=False,
+        temperature=0.1,
+     ),
     name='ConversationAgent',
     description='A conversational AI agent that engages with users about questions related to their memory context and stored information.',
     instruction="""
