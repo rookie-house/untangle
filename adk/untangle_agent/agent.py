@@ -4,7 +4,7 @@ from .sub_agents.conversation_agent.agent import conversation_agent
 
 untangle_agent = LlmAgent(
     name="UntangleCoordinatorAgent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     instruction="""
     You are the Untangle Coordinator Agent, the main root agent responsible for intelligently delegating user requests to the appropriate specialized sub-agents.
     

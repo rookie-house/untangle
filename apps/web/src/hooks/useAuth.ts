@@ -54,6 +54,10 @@ export function useAuth() {
       const res = await api.auth.signin(data, sessionId);
       setUser(res.data.data.user);
       localStorage.setItem('token', res.data.data.token);
+      setTimeout(() => {
+        console.log('📤 Posting token to window event:', res.data.data.token);
+        window.postMessage({ type: 'SAVE_TO_EXTENSION', token: res.data.data.token }, '*');
+      }, 500);
       return res.data;
     } catch (err: unknown) {
       const errorMessage = extractErrorMessage(err, 'Signin failed');

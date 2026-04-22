@@ -8,7 +8,7 @@ from ...schemas import (
 
 risk_evaluator_agent = LlmAgent(
      name="risk_evaluator",
-     model='gemini-2.5-flash',
+     model='gemini-2.5-flash-lite',
      instruction="""
      You are an AI Legal Document Risk Evaluator specializing in analyzing legal documents and terms of service.
      

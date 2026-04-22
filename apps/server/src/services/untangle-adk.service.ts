@@ -24,7 +24,7 @@ export class UntangleADKService {
 		return sessions;
 	};
 
-	public static readonly getSession = async({ ctx, userId, sessionId }: { ctx: Context; userId: number; sessionId: string }) => {
+	public static readonly getSession = async ({ ctx, userId, sessionId }: { ctx: Context; userId: number; sessionId: string }) => {
 		const session = await UntangleADK.getInstance({ api: ctx.env.UNTANGLE_ADK_API }).getSession({ userId, sessionId });
 		if (!session) {
 			throw new Error('failed to fetch session');
@@ -102,10 +102,14 @@ export class UntangleADKService {
 			}
 			return documentRecord;
 		});
-		
+
 		let fileData;
 		if (data) {
-			fileData = await this._downloadFile(data.url);
+			fileData = await this._downloadFile({
+				ctx,
+				documentId: data.id,
+				r2Url: data.url,
+			});
 		}
 
 		let files: IFileRaw[] = [];
@@ -146,7 +150,6 @@ export class UntangleADKService {
 			files = [...(files || []), downloadedFile];
 		}
 
-
 		try {
 			const response = await adk.runAgentInlineData({
 				userId,
@@ -177,7 +180,7 @@ export class UntangleADKService {
 				session: {
 					id: sessionId,
 				},
-				response: response
+				response: response,
 			};
 		} catch (error) {
 			console.error('Error in UntangleADKService.start:', error);
@@ -213,11 +216,24 @@ export class UntangleADKService {
 		return result;
 	};
 
-	private static _downloadFile = async (r2Url: string) => {
+	private static _downloadFile = async ({ ctx, documentId, r2Url }: { ctx: Context; documentId: string; r2Url: string }) => {
+		const r2 = R2.getInstance(ctx.env.BUCKET, ctx.env.BASE_URL);
+		const object = await r2.get(documentId);
+
+		if (object?.body) {
+			const contentType = object.httpMetadata?.contentType || 'application/octet-stream';
+			return new Response(object.body, {
+				headers: {
+					'content-type': contentType,
+				},
+			});
+		}
+
 		const res = await fetch(r2Url);
 		if (!res.ok) {
-			throw new Error(`Failed to download file from R2: ${res.statusText}`);
+			throw new Error(`Failed to download file from R2 (key: ${documentId}, url: ${r2Url}): ${res.status} ${res.statusText}`);
 		}
+
 		return res;
 	};
 }
