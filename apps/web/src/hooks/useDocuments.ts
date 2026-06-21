@@ -9,40 +9,63 @@ export function useDocuments() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const fetchDocuments = useCallback(
-    async (params?: { pageSize?: number; offset?: number }) => {
+    async (params?: { pageSize?: number; offset?: number }, append = false) => {
       if (!user) return;
 
-      setLoading(true);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       try {
         const response = await api.documents.getDocuments(params);
-        if (response.data && Array.isArray(response.data)) {
-          setDocuments(response.data);
+        let newDocs: Document[] = [];
+
+        if (response?.success && response?.data?.documents) {
+          newDocs = response.data.documents;
+        } else if (response?.data && Array.isArray(response.data)) {
+          newDocs = response.data;
+        }
+
+        const pageSize = params?.pageSize || 10;
+        setHasMore(newDocs.length >= pageSize);
+
+        if (append) {
+          setDocuments((prev) => [...prev, ...newDocs]);
+        } else {
+          setDocuments(newDocs);
         }
       } catch (err) {
         console.error('Error fetching documents:', err);
         setError('Failed to load documents');
       } finally {
-        setLoading(false);
+        if (append) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
       }
     },
     [user]
   );
 
-  const fetchDocumentById = async (id: number) => {
+  const fetchDocumentById = async (id: number | string) => {
     if (!user) return null;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await api.documents.getDocumentById(id);
-      setSelectedDocument(response.data);
+      const response = await api.documents.getDocumentById(Number(id) || 0); // Convert if needed
+      setSelectedDocument(response.data?.document || response.data);
       return response.data;
     } catch (err) {
       console.error('Error fetching document:', err);
@@ -61,7 +84,9 @@ export function useDocuments() {
 
     try {
       const response = await api.documents.getDocumentsBySession(sessionId);
-      if (response.data && Array.isArray(response.data)) {
+      if (response?.success && response?.data?.documents) {
+        setDocuments(response.data.documents);
+      } else if (response?.data && Array.isArray(response.data)) {
         setDocuments(response.data);
       }
       return response.data;
@@ -94,17 +119,25 @@ export function useDocuments() {
     }
   };
 
-  const updateDocumentCategory = async (documentId: number, categoryId: number | null) => {
+  const updateDocumentCategory = async (documentId: number | string, categoryId: number | null) => {
     if (!user) return null;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await api.documents.updateDocumentCategory(documentId, categoryId);
+      const response = await api.documents.updateDocumentCategory(Number(documentId) || 0, categoryId);
       // Update the document in the local state
       setDocuments((prev) =>
-        prev.map((doc) => (doc.id === documentId ? { ...doc, categoryId } : doc))
+        prev.map((doc) => {
+          if (doc.documents.id === documentId.toString()) {
+            return {
+              ...doc,
+              // categoryId is not part of the new schema, but you might want to handle it appropriately
+            };
+          }
+          return doc;
+        })
       );
       return response.data;
     } catch (err) {
@@ -119,7 +152,7 @@ export function useDocuments() {
   // Fetch documents when the component mounts or user changes
   useEffect(() => {
     if (user) {
-      fetchDocuments();
+      fetchDocuments({ pageSize: 10, offset: 0 });
     }
   }, [user, fetchDocuments]);
 
@@ -127,6 +160,8 @@ export function useDocuments() {
     documents,
     selectedDocument,
     loading,
+    loadingMore,
+    hasMore,
     error,
     fetchDocuments,
     fetchDocumentById,

@@ -1,4 +1,4 @@
-import { documents } from '@/lib/db/schema';
+import { documents, sessions } from '@/lib/db/schema';
 import { R2 } from '@/lib/r2';
 import type { DbType } from '@/types/user';
 import { eq, and } from 'drizzle-orm';
@@ -45,7 +45,8 @@ export class DocumentsService {
 				title: fileName,
 				type: type,
 			})
-			.returning().get();
+			.returning()
+			.get();
 
 		if (!document) {
 			throw new Error('Document record creation failed');
@@ -65,11 +66,19 @@ export class DocumentsService {
 		pageSize: number;
 		offset: number;
 	}) => {
-		const documentsList = await db.select().from(documents).where(eq(documents.userId, userId)).limit(pageSize).offset(offset);
+		const documentsList = await db
+			.select()
+			.from(documents)
+			.where(eq(documents.userId, userId))
+			.leftJoin(sessions, and(eq(sessions.id, documents.sessionId), eq(sessions.userId, userId)))
+			.limit(pageSize)
+			.offset(offset);
 
 		if (!documentsList) {
 			throw new Error('No documents found for the user');
 		}
+
+		console.log('Retrieved documents:', documentsList);
 
 		return { documents: documentsList };
 	};
@@ -78,7 +87,7 @@ export class DocumentsService {
 		const document = await db
 			.select()
 			.from(documents)
-			.where(eq(documents.id, documentId) && eq(documents.userId, userId))
+			.where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
 			.get();
 
 		if (!document) {

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ExternalLink, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ExternalLink, Plus, FileText, Image as ImageIcon, File } from 'lucide-react';
+import { useDocuments } from '@/hooks/useDocuments';
 
 type Collection = {
   id: string;
@@ -43,6 +44,29 @@ const AllDocumentsPage = () => {
       count: 3,
     },
   ]);
+
+  const { documents, loading: isLoading, loadingMore, hasMore, error, fetchDocuments } = useDocuments();
+
+  const handleLoadMore = () => {
+    fetchDocuments({ offset: documents.length, pageSize: 10 }, true);
+  };
+
+  const getDocumentIcon = (type: string) => {
+    if (!type) return <File className="w-8 h-8 text-gray-500" />;
+    switch (type.toLowerCase()) {
+      case 'pdf':
+        return <FileText className="w-8 h-8 text-red-500" />;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+        return <ImageIcon className="w-8 h-8 text-blue-500" />;
+      case 'pptx':
+      case 'ppt':
+        return <File className="w-8 h-8 text-orange-500" />;
+      default:
+        return <File className="w-8 h-8 text-gray-500" />;
+    }
+  };
 
   return (
     <div className="space-y-8 rounded-2xl bg-white p-6">
@@ -88,24 +112,53 @@ const AllDocumentsPage = () => {
       {/* Recently Added Section */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Recently Added</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((item) => (
-            <div
-              key={item}
-              className="bg-white rounded-xl p-4 border border-gray-200 cursor-pointer transition-all hover:shadow-md hover:border-blue-300"
-            >
-              <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-3 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mx-auto mb-2"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mx-auto mb-2"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mx-auto"></div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-gray-500">Loading documents...</div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-32 bg-red-50 rounded-xl border-2 border-dashed border-red-200">
+            <div className="text-red-500">{error}</div>
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="flex items-center justify-center h-32 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+            <div className="text-gray-500">No documents found.</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {documents.map((item) => (
+              <div
+                key={item.documents.id}
+                onClick={() => window.open(item.documents.url, '_blank')}
+                className="bg-white rounded-xl p-4 border border-gray-200 cursor-pointer transition-all hover:shadow-md hover:border-blue-300 group"
+              >
+                <div className="w-full h-32 bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-blue-50 group-hover:to-blue-100 rounded-lg mb-3 flex items-center justify-center transition-colors">
+                  {getDocumentIcon(item.documents.type)}
                 </div>
+                <h4 className="font-medium text-gray-900 text-sm truncate" title={item.documents.title}>
+                  {item.documents.title}
+                </h4>
+                <p className="text-xs text-gray-500 mt-1 truncate">
+                  {item.sessions ? item.sessions.title : 'No Session'}
+                </p>
               </div>
-              <h4 className="font-medium text-gray-900 text-sm">Document {item}</h4>
-              <p className="text-xs text-gray-500 mt-1">Property Agreement</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {hasMore && documents.length > 0 && !isLoading && !error && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="px-6 py-2 bg-blue-50 text-blue-600 font-medium rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {loadingMore ? 'Loading...' : 'Load More Documents'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

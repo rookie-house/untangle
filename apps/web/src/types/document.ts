@@ -1,12 +1,21 @@
 export interface Document {
-  id: number;
-  title: string;
-  type: 'image' | 'pdf' | 'other';
-  url: string;
-  userId: number;
-  categoryId?: number | null;
-  createdAt: string;
-  updatedAt: string;
+  documents: {
+    id: string;
+    title: string;
+    type: string;
+    url: string;
+    userId: number;
+    sessionId: string | null;
+    updatedAt: string;
+    createdAt: string;
+  };
+  sessions: {
+    id: string;
+    title: string;
+    userId: number;
+    updatedAt: string;
+    createdAt: string;
+  } | null;
 }
 
 export interface Category {
