@@ -1,6 +1,6 @@
 // src/service_worker.ts
 
-// import api from "./lib/api/api";
+import api from "./lib/api/api";
 
 import { analyzeLegalDocument } from './lib/demo-ai.agent/agents';
 import { highlightPhrases as _highlightPhrases } from './lib/highLight';
@@ -54,7 +54,7 @@ chrome.runtime.onMessage.addListener(async (message, sender) => {
       break;
     case "demistifyRequest":
       try {
-        const { tabId } = message;
+        const { tabId, sessionId, documentId, img } = message;
         console.log("Service Worker received initial request for tab ID:", tabId);
         console.log("Sender info:", sender);
 
@@ -77,8 +77,45 @@ chrome.runtime.onMessage.addListener(async (message, sender) => {
         const scrapedData = executionResult.result as { title: string; bodyText: string; url?: string };
         console.log("Scraping successful. Data length:", (scrapedData.bodyText || '').length);
 
-        // Analyze the scraped content locally
-        const analysis = analyzeLegalDocument({ title: scrapedData.title || '', bodyText: scrapedData.bodyText || '', url: scrapedData.url });
+        const requestMessage = [
+          scrapedData.title ? `Title: ${scrapedData.title}` : "",
+          scrapedData.url ? `URL: ${scrapedData.url}` : "",
+          scrapedData.bodyText || "",
+        ].filter(Boolean).join("\n\n");
+
+        let analysis = analyzeLegalDocument({
+          title: scrapedData.title || '',
+          bodyText: scrapedData.bodyText || '',
+          url: scrapedData.url,
+        });
+
+        try {
+          const apiResponse = await api.agent.startSession({
+            message: requestMessage,
+            sessionId,
+            documentId,
+            img,
+          });
+
+          if (!apiResponse.success || !apiResponse.data) {
+            throw new Error(apiResponse.message || "Failed to get session analysis.");
+          }
+
+          const sessionData = apiResponse.data as {
+            explanation?: string;
+            confidence?: number;
+            highlights?: string[];
+            text?: string;
+          };
+
+          analysis = {
+            explanation: sessionData.explanation || sessionData.text || analysis.explanation,
+            confidence: sessionData.confidence ?? analysis.confidence,
+            highlights: sessionData.highlights || analysis.highlights,
+          };
+        } catch (apiError) {
+          console.error("Session API call failed, falling back to local analysis:", apiError);
+        }
 
         // Send the explanation back to the UI
         chrome.runtime.sendMessage({

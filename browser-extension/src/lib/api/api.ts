@@ -24,7 +24,7 @@ class API {
     ax.interceptors.request.use(async (config) => {
       let accessToken: string | undefined = undefined;
 
-      if (!accessToken && typeof window !== "undefined") {
+      if (!accessToken && typeof chrome !== "undefined" && chrome.storage?.local) {
         const result = await chrome.storage.local.get("access_token");
         accessToken = result["access_token"] ?? undefined;
       } 
