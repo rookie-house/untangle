@@ -126,11 +126,12 @@ export class RedisClient {
 	 * @param expiryInSeconds - Optional expiration time for the user in seconds.
 	 * @returns A promise that resolves when the user is set.
 	 */
-	async setUser({ phoneNumber, token, expiryInSeconds }: { phoneNumber: string; token: string; expiryInSeconds?: number }): Promise<void> {
+	async setUser({ phoneNumber, token, sessionId, expiryInSeconds }: { phoneNumber: string; token: string; sessionId?: string; expiryInSeconds?: number }): Promise<void> {
 		try {
 			await this.client.hset(this._userPrefix(phoneNumber), {
 				phoneNumber,
 				token,
+				sessionId,
 			});
 
 			if (expiryInSeconds) {
@@ -151,10 +152,12 @@ export class RedisClient {
 	async updateUser({
 		phoneNumber,
 		token,
+		sessionId,
 		expiryInSeconds,
 	}: {
 		phoneNumber: string;
 		token: string;
+		sessionId?: string;
 		expiryInSeconds?: number;
 	}): Promise<void> {
 		try {
@@ -166,6 +169,7 @@ export class RedisClient {
 
 			await this.client.hset(this._userPrefix(phoneNumber), {
 				token,
+				...(sessionId && { sessionId })
 			});
 
 			if (expiryInSeconds) {

@@ -1,0 +1,135 @@
+import axios from "axios";
+import type { Context } from "hono";
+
+export async function getAuthLink(
+	phoneNumber: string,
+	ctx: Context
+): Promise<{ url: string }> {
+	try {
+		const { data } = await axios.post(
+			`${ctx.env.BACKEND_URL}/api/auth/whatsapp/start`,
+			{
+				phoneNumber,
+			},
+			{
+				headers: { "Content-Type": "application/json" },
+			}
+		);
+		if (!data) {
+			throw new Error("No response data from getAuthLink");
+		}
+		return data.data;
+	} catch (error: any) {
+		console.error("Error in getAuthLink:", error);
+		throw new Error(
+			`Failed to get auth link: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+		);
+	}
+}
+
+export async function getADKSession(token: string, ctx: Context): Promise<any> {
+	try {
+		const { data } = await axios.get(
+			`${ctx.env.BACKEND_URL}/api/agents/session`,
+			{
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		);
+		if (!data) {
+			throw new Error("No response data from getADKSession");
+		}
+		return data;
+	} catch (error: any) {
+		console.error("Error in getADKSession:", error);
+		throw new Error(
+			`Failed to get ADK session: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+		);
+	}
+}
+
+export async function uploadDocument(
+	file: File,
+	token: string,
+	ctx: Context
+): Promise<any> {
+	try {
+		const formData = new FormData();
+		formData.append("file", file);
+
+		const { data } = await axios.put(
+			`${ctx.env.BACKEND_URL}/api/documents/upload`,
+			formData,
+			{
+				headers: { Authorization: `Bearer ${token}` },
+			}
+		);
+		if (!data) {
+			throw new Error("No response data from uploadDocument");
+		}
+		return data;
+	} catch (error: any) {
+		console.error("Error in uploadDocument:", error);
+		throw new Error(
+			`Failed to upload document: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+		);
+	}
+}
+
+export async function chatWithADKSession(
+	payload: ChatSessionPayload,
+	token: string,
+	ctx: Context
+): Promise<any> {
+	if (!payload.message || payload.message.length < 2) {
+		throw new Error("Message must be at least 2 characters long.");
+	}
+	try {
+		const { data } = await axios.post(
+			`${ctx.env.BACKEND_URL}/api/agents/session`,
+			payload,
+			{
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		);
+		if (!data) {
+			throw new Error("No response data from chatWithADKSession");
+		}
+		return data;
+	} catch (error: any) {
+		console.error("Error in chatWithADKSession:", error);
+		throw new Error(
+			`Failed to chat with ADK session: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+		);
+	}
+}
+
+export interface ChatImage {
+	key: string;
+	title: string;
+	url: string;
+	type: "pdf" | "image" | "other";
+}
+
+export interface ChatSessionPayload {
+	message: string;
+	sessionId?: string;
+	img?: ChatImage[];
+}
+
+export function createChatSessionPayload(
+	message: string,
+	sessionId?: string,
+	img?: ChatImage[]
+): ChatSessionPayload {
+	return {
+		message,
+		...(sessionId && { sessionId }),
+		...(img && { img }),
+	};
+}

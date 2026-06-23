@@ -35,6 +35,8 @@ export class AuthService {
 		// Check if user already exists
 		const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
 
+		console.log(existingUser);
+
 		if (existingUser) {
 			throw new Error('A user with this email address already exists.');
 		}
@@ -71,15 +73,17 @@ export class AuthService {
 			throw new Error('Failed to create user.');
 		}
 
+		console.log('helo');
+
 		const token = await this._signToken({
 			secret: ctx.env.JWT_SECRET,
 			user: { id: newUser.id },
 		});
 
-		if (phoneNumber && redis && sessionId) {
-			await this._upsertUserToken({ redis, phoneNumber: phoneNumber, token });
-			await redis.deleteSession({ sessionId });
-		}
+		// if (phoneNumber && redis && sessionId) {
+		// 	await this._upsertUserToken({ redis, phoneNumber: phoneNumber, token });
+		// 	await redis.deleteSession({ sessionId });
+		// }
 
 		return { token, user: { id: newUser.id, email: newUser.email, name: newUser.name, profilePic: newUser.profilePic } };
 	};
